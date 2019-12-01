@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver.net;
+package io.github.kraowx.shibbyappserver.net;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

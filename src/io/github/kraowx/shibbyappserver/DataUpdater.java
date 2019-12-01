@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver;
+package io.github.kraowx.shibbyappserver;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,11 +17,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import io.github.kraowx.shibbydexserver.models.MasterList;
-import io.github.kraowx.shibbydexserver.models.ShibbyFile;
-import io.github.kraowx.shibbydexserver.models.ShibbyFileArray;
-import io.github.kraowx.shibbydexserver.tools.FormattedOutput;
-import io.github.kraowx.shibbydexserver.tools.SortByFileCount;
+import io.github.kraowx.shibbyappserver.models.MasterList;
+import io.github.kraowx.shibbyappserver.models.ShibbyFile;
+import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
+import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
+import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
 
 public class DataUpdater
 {

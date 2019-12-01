@@ -1,8 +1,8 @@
-package io.github.kraowx.shibbydexserver.tools;
+package io.github.kraowx.shibbyappserver.tools;
 
 import java.util.Comparator;
 
-import io.github.kraowx.shibbydexserver.models.ShibbyFileArray;
+import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
 
 public class SortByFileCount implements Comparator<ShibbyFileArray>
 {

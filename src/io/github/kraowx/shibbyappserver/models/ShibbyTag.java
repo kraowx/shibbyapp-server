@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver.models;
+package io.github.kraowx.shibbyappserver.models;
 
 import java.util.ArrayList;
 import java.util.List;

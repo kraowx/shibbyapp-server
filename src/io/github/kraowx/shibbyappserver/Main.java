@@ -1,6 +1,6 @@
-package io.github.kraowx.shibbydexserver;
+package io.github.kraowx.shibbyappserver;
 
-import io.github.kraowx.shibbydexserver.net.Server;
+import io.github.kraowx.shibbyappserver.net.Server;
 
 public class Main
 {

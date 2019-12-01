@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver.tools;
+package io.github.kraowx.shibbyappserver.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -1,9 +1,9 @@
-package io.github.kraowx.shibbydexserver.net;
+package io.github.kraowx.shibbyappserver.net;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.github.kraowx.shibbydexserver.DataUpdater;
+import io.github.kraowx.shibbyappserver.DataUpdater;
 
 public class Server
 {

@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver.net;
+package io.github.kraowx.shibbyappserver.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,8 +7,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import io.github.kraowx.shibbydexserver.DataUpdater;
-import io.github.kraowx.shibbydexserver.tools.FormattedOutput;
+import io.github.kraowx.shibbyappserver.DataUpdater;
+import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 
 public class ClientListener
 {

@@ -1,4 +1,4 @@
-package io.github.kraowx.shibbydexserver.net;
+package io.github.kraowx.shibbyappserver.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +6,8 @@ import java.io.PrintWriter;
 
 import org.json.JSONArray;
 
-import io.github.kraowx.shibbydexserver.DataUpdater;
+import io.github.kraowx.shibbyappserver.DataUpdater;
+import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 
 public class ClientHandler implements Runnable
 {
@@ -27,11 +28,13 @@ public class ClientHandler implements Runnable
 	{
 		try
 		{
-			Request req;
-			String data;
+			Request req = null;
+			String data = null;
 			while ((data = reader.readLine()) != null)
 			{
 				req = Request.fromJSON(data);
+				System.out.println(FormattedOutput.get("Client requested " +
+						req.getType()));
 				Response resp;
 				switch (req.getType())
 				{
@@ -57,6 +60,8 @@ public class ClientHandler implements Runnable
 						break;
 				}
 				writer.println(resp.toString());
+				System.out.println(FormattedOutput.get("Responded to client with " +
+						resp.getType()));
 			}
 		}
 		catch (IOException ioe)
