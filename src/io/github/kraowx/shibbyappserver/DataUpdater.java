@@ -173,6 +173,7 @@ public class DataUpdater
 	
 	private void updateTags()
 	{
+		tags.clear();
 		for (ShibbyFile file : files)
 		{
 			for (String tag : file.getTags())
