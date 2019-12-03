@@ -35,30 +35,7 @@ public class ClientHandler implements Runnable
 				req = Request.fromJSON(data);
 				System.out.println(FormattedOutput.get("Client requested " +
 						req.getType()));
-				Response resp;
-				switch (req.getType())
-				{
-					case ALL:
-						resp = new Response(ResponseType.ALL,
-								dataUpdater.getAllJSON());
-						break;
-					case FILES:
-						resp = new Response(ResponseType.FILES,
-								dataUpdater.getFilesJSON());
-						break;
-					case TAGS:
-						resp = new Response(ResponseType.TAGS,
-								dataUpdater.getTagsJSON());
-						break;
-					case SERIES:
-						resp = new Response(ResponseType.SERIES,
-								dataUpdater.getSeriesJSON());
-						break;
-					default:
-						resp = new Response(ResponseType.INVALID_REQUEST,
-								new JSONArray());
-						break;
-				}
+				Response resp = getResponse(req);
 				writer.println(resp.toString());
 				System.out.println(FormattedOutput.get("Responded to client with " +
 						resp.getType()));
@@ -68,5 +45,29 @@ public class ClientHandler implements Runnable
 		{
 			ioe.printStackTrace();
 		}
+	}
+	
+	private Response getResponse(Request request)
+	{
+		switch (request.getType())
+		{
+			case VERSION:
+				return new Response(ResponseType.VERSION,
+						new JSONArray(Server.VERSION));
+			case ALL:
+				return new Response(ResponseType.ALL,
+						dataUpdater.getAllJSON());
+			case FILES:
+				return new Response(ResponseType.FILES,
+						dataUpdater.getFilesJSON());
+			case TAGS:
+				return new Response(ResponseType.TAGS,
+						dataUpdater.getTagsJSON());
+			case SERIES:
+				return new Response(ResponseType.SERIES,
+						dataUpdater.getSeriesJSON());
+		}
+		return new Response(ResponseType.INVALID_REQUEST,
+				new JSONArray());
 	}
 }

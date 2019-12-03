@@ -7,6 +7,8 @@ import io.github.kraowx.shibbyappserver.DataUpdater;
 
 public class Server
 {
+	public static String VERSION = "1.0.0";
+	
 	private int port;
 	private ClientListener clientListener;
 	private DataUpdater dataUpdater;
