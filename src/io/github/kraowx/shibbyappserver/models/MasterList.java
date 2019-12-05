@@ -37,7 +37,7 @@ public class MasterList
 				String name = details.select("a").text();
 				String link = details.select("a").first().attr("href");
 				String description = details.select("span[class*=soundDescription]").text();
-				files.add(new ShibbyFile(name, null, link, description));
+				files.add(new ShibbyFile(name, link, description));
 			}
 		}
 		catch (IOException ioe)

@@ -191,7 +191,7 @@ public class DataUpdater
 				else
 				{
 					tags.add(new ShibbyFileArray(tag,
-							new ShibbyFile[]{file}));
+							new ShibbyFile[]{file}, null));
 				}
 			}
 		}

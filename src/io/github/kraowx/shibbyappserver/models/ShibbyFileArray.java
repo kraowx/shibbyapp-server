@@ -1,7 +1,9 @@
 package io.github.kraowx.shibbyappserver.models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,18 +12,21 @@ public class ShibbyFileArray
 {
 	private String name;
 	private List<ShibbyFile> files;
+	private Map<String, String> extraData;
 	
 	public ShibbyFileArray(String name)
 	{
-		init(name, null);
+		init(name, null, null);
 	}
 	
-	public ShibbyFileArray(String name, ShibbyFile[] files)
+	public ShibbyFileArray(String name, ShibbyFile[] files,
+			Map<String, String> extraData)
 	{
-		init(name, files);
+		init(name, files, extraData);
 	}
 	
-	private void init(String name, ShibbyFile[] files)
+	private void init(String name, ShibbyFile[] files,
+			Map<String, String> extraData)
 	{
 		this.name = name;
 		this.files = new ArrayList<ShibbyFile>();
@@ -32,6 +37,8 @@ public class ShibbyFileArray
 				this.files.add(file);
 			}
 		}
+		this.extraData = extraData != null ? extraData :
+			new HashMap<String, String>();
 	}
 	
 	public JSONObject toJSON()
@@ -45,6 +52,12 @@ public class ShibbyFileArray
 			arr.put(file.toJSON());
 		}
 		json.put("files", arr);
+		JSONObject extras = new JSONObject();
+		for (String key : extraData.keySet())
+		{
+			extras.put(key, extraData.get(key));
+		}
+		json.put("extras", extras);
 		return json;
 	}
 	
