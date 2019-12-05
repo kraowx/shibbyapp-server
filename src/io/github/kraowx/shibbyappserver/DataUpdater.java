@@ -86,7 +86,15 @@ public class DataUpdater
 		JSONArray arr = new JSONArray();
 		for (ShibbyFileArray tag : tags)
 		{
-			arr.put(tag.toJSON());
+			JSONObject objTag = new JSONObject();
+			objTag.put("name", tag.getName());
+			JSONArray arrTag = new JSONArray();
+			for (ShibbyFile file : tag.getFiles())
+			{
+				arrTag.put(file.getId());
+			}
+			objTag.put("files", arrTag);
+			arr.put(objTag);
 		}
 		return arr;
 	}
