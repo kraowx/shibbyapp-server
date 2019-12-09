@@ -5,23 +5,36 @@ import io.github.kraowx.shibbyappserver.net.Server;
 public class Main
 {
 	static int DEFAULT_PORT = 1967;
+	static int DEFAULT_INTERVAL = 24*60;
 	
 	public static void main(String[] args)
 	{
-		int port = DEFAULT_PORT;
-		if (args.length > 0)
+		int port = getIntArg("-port", "-p", DEFAULT_PORT, args);
+		int interval = getIntArg("-interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
+		Server server = new Server(port, interval);
+	}
+	
+	private static int getIntArg(String arg, String shortArg,
+			int defaultArg, String[] args)
+	{
+		for (int i = 0; i < args.length; i++)
 		{
-			try
+			if (args[i].equals(arg) || args[i].equals(shortArg))
 			{
-				port = Integer.parseInt(args[0]);
-			}
-			catch (NumberFormatException nfe)
-			{
-				System.out.println("Invalid argument \"" +
-						args[0] + "\". Terminating...");
-				System.exit(1);
+				if (i < args.length-1)
+				{
+					try
+					{
+						int argInt = Integer.parseInt(args[i+1]);
+						return argInt;
+					}
+					catch (NumberFormatException nfe)
+					{
+						return defaultArg;
+					}
+				}
 			}
 		}
-		Server server = new Server(port);
+		return defaultArg;
 	}
 }

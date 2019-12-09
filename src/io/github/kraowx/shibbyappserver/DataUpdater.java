@@ -25,16 +25,16 @@ import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
 
 public class DataUpdater
 {
-	private final int DEFAULT_UPDATE_INTERVAL = 1*60*60*1000;
-	
+	private int interval;
 	private boolean initialized;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags;
 	private MasterList masterList;
 	private Timer timer;
 	
-	public DataUpdater()
+	public DataUpdater(int interval)
 	{
+		this.interval = interval;
 		files = new ArrayList<ShibbyFile>();
 		tags = new ArrayList<ShibbyFileArray>();
 		masterList = new MasterList();
@@ -53,7 +53,7 @@ public class DataUpdater
 				{
 					update();
 				}
-			}, 0, DEFAULT_UPDATE_INTERVAL);
+			}, 0, interval);
 		}
 	}
 	

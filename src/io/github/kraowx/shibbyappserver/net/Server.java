@@ -9,13 +9,14 @@ public class Server
 {
 	public static String VERSION = "1.0.1";
 	
-	private int port;
+	private int port, interval;
 	private ClientListener clientListener;
 	private DataUpdater dataUpdater;
 	
-	public Server(int port)
+	public Server(int port, int interval)
 	{
 		this.port = port;
+		this.interval = interval;
 		start();
 	}
 	
@@ -23,7 +24,7 @@ public class Server
 	{
 		if (clientListener == null)
 		{
-			dataUpdater = new DataUpdater();
+			dataUpdater = new DataUpdater(interval);
 			new Timer().scheduleAtFixedRate(new TimerTask()
 			{
 				@Override
