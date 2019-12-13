@@ -211,7 +211,8 @@ public class DataUpdater
 	
 	private void filterTags()
 	{
-		List<ShibbyFileArray> temp = (List<ShibbyFileArray>)((ArrayList)tags).clone();
+		List<ShibbyFileArray> temp =
+				(List<ShibbyFileArray>)((ArrayList)tags).clone();
 		for (ShibbyFileArray tag : temp)
 		{
 			if (tag.getFileCount() == 1)

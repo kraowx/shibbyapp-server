@@ -13,35 +13,43 @@ import org.json.JSONObject;
 
 public class ShibbyFile
 {
-	private String name, id, link, description;
+	private String name, shortName, id, link, description;
 	private List<String> tags;
 	private Map<String, String> extraData;
 	
 	public ShibbyFile(String name, String link,
 			String description)
 	{
-		init(name, null, link, description, null);
+		init(name, null, null, link, description, null);
 	}
 	
 	public ShibbyFile(String name, String id,
-			String link, String description,
+			List<String> tags, String link, String description,
 			Map<String, String> extraData)
 	{
-		init(name, id, link, description, extraData);
+		init(name, id, tags, link, description, extraData);
 	}
 	
 	private void init(String name, String id,
-			String link, String description,
+			List<String> tags, String link, String description,
 			Map<String, String> extraData)
 	{
 		this.name = name;
+		this.shortName = getShortName(name);
 		if (id == null && name != null)
 		{
 			createIdFromName();
 		}
+		if (tags != null)
+		{
+			this.tags = tags;
+		}
+		else
+		{
+			this.tags = getTagsFromName();
+		}
 		this.link = link;
 		this.description = description;
-		tags = getTagsFromName();
 		this.extraData = extraData != null ? extraData :
 			new HashMap<String, String>();
 	}
@@ -50,6 +58,13 @@ public class ShibbyFile
 	{
 		JSONObject json = new JSONObject();
 		json.put("name", name);
+		json.put("shortName", shortName);
+		JSONArray tagsJson = new JSONArray();
+		for (String tag : tags)
+		{
+			tagsJson.put(tag);
+		}
+		json.put("tags", tagsJson);
 		json.put("link", link);
 		json.put("description", description);
 		JSONObject extras = new JSONObject();
@@ -66,9 +81,33 @@ public class ShibbyFile
         ShibbyFile file = new ShibbyFile(null, null, null);
         JSONObject json = new JSONObject(jsonStr);
         file.name = json.getString("name");
+        if (json.has("shortName"))
+        {
+        	file.shortName = json.getString("shortName");
+        }
+        else
+        {
+        	file.shortName = file.getShortName(file.name);
+        }
         if (!json.has("id") && file.name != null)
         {
             file.createIdFromName();
+        }
+        else
+        {
+        	file.id = json.getString("id");
+        }
+        if (!json.has("tags") && file.name != null)
+        {
+        	file.tags = file.getTagsFromName();
+        }
+        else
+        {
+	        file.tags = new ArrayList<String>();
+	        for (Object tag : json.getJSONArray("tags"))
+	        {
+	        	file.tags.add((String)tag);
+	        }
         }
         file.link = json.getString("link");
         file.description = json.getString("description");
@@ -89,6 +128,16 @@ public class ShibbyFile
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	public String getShortName()
+	{
+		return shortName;
+	}
+	
+	public void setShortName(String shortName)
+	{
+		this.shortName = shortName;
 	}
 	
 	public String getId()
@@ -160,6 +209,52 @@ public class ShibbyFile
 		return tags;
 	}
 	
+	private String getShortName(String name)
+	{
+		String tags = "";
+		char[] chars = name.toCharArray();
+		boolean in = true;
+		char c;
+		for (int i = 0; i < chars.length; i++)
+		{
+			c = chars[i];
+			if (c == '[')
+			{
+				if (in && i != 0)
+				{
+					tags = "";
+					break;
+				}
+				in = true;
+			}
+			else if (c == ']' || c == ')')
+			{
+				in = false;
+			}
+			else if (!in && c != ' ')
+			{
+				name = name.substring(i, name.length()-1);
+				break;
+			}
+			tags += c;
+		}
+		if (!tags.endsWith(" "))
+		{
+			tags += " ";
+		}
+		if (!tags.contains("[") && !tags.contains("]"))
+		{
+			tags = "";
+		}
+		// Remove right tags
+		int rightIndex = name.indexOf('[');
+		if (rightIndex != -1)
+		{
+			name = name.substring(0, rightIndex);
+		}
+		return tags + name;
+	}
+	
 	private void createIdFromName()
 	{
 		try
@@ -170,7 +265,7 @@ public class ShibbyFile
 
 	        for (int i = 0; i < hash.length; i++)
 	        {
-	            String hex = Integer.toHexString(0xff & hash[i]);
+	            String hex = Integer.toHexString(0xFF & hash[i]);
 	            if (hex.length() == 1)
 	            {
 	            	hexString.append('0');
