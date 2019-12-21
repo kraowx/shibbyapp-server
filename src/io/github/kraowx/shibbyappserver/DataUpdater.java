@@ -169,6 +169,7 @@ public class DataUpdater
 				jss = jss.substring(jss.indexOf("m4a: \"")+6);
 				jss = jss.substring(0, jss.indexOf("\""));
 				file.setLink(jss);
+				System.out.println(file.getShortName());
 			}
 			catch (IOException ioe)
 			{
