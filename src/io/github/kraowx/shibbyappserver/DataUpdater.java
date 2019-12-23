@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
@@ -141,6 +142,7 @@ public class DataUpdater
 	
 	private void update()
 	{
+		long startTime = Calendar.getInstance().getTime().getTime();
 		System.out.println(FormattedOutput.get("Starting data update..."));
 		System.out.println(FormattedOutput.get("Updating master file list..."));
 		updateFiles();
@@ -150,33 +152,42 @@ public class DataUpdater
 		{
 			initialized = true;
 		}
-		System.out.println(FormattedOutput.get("Data update complete."));
+		long endTime = Calendar.getInstance().getTime().getTime();
+		float duration = (float)(endTime - startTime)/1000;
+		System.out.println(FormattedOutput.get("Data update complete in " +
+				duration + " seconds."));
 	}
 	
 	private void updateFiles()
 	{
-		masterList.update();
-		files = masterList.getFiles();
-		for (int i = 0; i < files.size(); i++)
+		if (masterList.update())
 		{
-			ShibbyFile file = files.get(i);
-			try
+			files = masterList.getFiles();
+			for (int i = 0; i < files.size(); i++)
 			{
-				System.out.println("Updating file " + (i+1) + "/" + files.size() + "...");
-				Document doc = Jsoup.connect(file.getLink()).get();
-				Element js = doc.select("script[type*=text/javascript]").get(1);
-				String jss = js.toString();
-				jss = jss.substring(jss.indexOf("m4a: \"")+6);
-				jss = jss.substring(0, jss.indexOf("\""));
-				file.setLink(jss);
-				System.out.println(file.getShortName());
+				ShibbyFile file = files.get(i);
+				try
+				{
+					System.out.println(FormattedOutput.get("Updating file " +
+							(i+1) + "/" + files.size() + "..."));
+					Document doc = Jsoup.connect(file.getLink()).get();
+					Element js = doc.select("script[type*=text/javascript]").get(1);
+					String jss = js.toString();
+					jss = jss.substring(jss.indexOf("m4a: \"")+6);
+					jss = jss.substring(0, jss.indexOf("\""));
+					file.setLink(jss);
+				}
+				catch (IOException ioe)
+				{
+					ioe.printStackTrace();
+					System.out.println(FormattedOutput.get("Failed to update file " +
+							(i+1) + "/" + files.size()));
+				}
 			}
-			catch (IOException ioe)
-			{
-				ioe.printStackTrace();
-				System.out.println(FormattedOutput.get("Failed to update file " +
-						(i+1) + "/" + files.size()));
-			}
+		}
+		else
+		{
+			System.out.println(FormattedOutput.get("Master list is up to date."));
 		}
 	}
 	
