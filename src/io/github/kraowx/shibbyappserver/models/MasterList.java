@@ -34,14 +34,10 @@ public class MasterList
 			if (updateNeeded(doc))
 			{
 				this.doc = doc;
-				Elements soundsDetails = doc.select("div[class*=sound-details]");
-				files = new ArrayList<ShibbyFile>();
-				for (Element details : soundsDetails)
+				files = parseDocument(doc);
+				for (ShibbyFile file : files)
 				{
-					String name = details.select("a").text();
-					String link = details.select("a").first().attr("href");
-					String description = details.select("span[class*=soundDescription]").text();
-					files.add(new ShibbyFile(name, link, description));
+					System.out.println(file.getShortName());
 				}
 				return true;
 			}
@@ -59,14 +55,36 @@ public class MasterList
 		{
 			return true;
 		}
-		Elements details1 = this.doc.select("div[class*=sound-details]");
-		Elements details2 = doc.select("div[class*=sound-details]");
-		String link1 = details1.select("a").first().attr("href");
-		String link2 = details2.select("a").first().attr("href");
-		if (!link1.equals(link2))
+		List<ShibbyFile> filesNew = parseDocument(doc);
+		if (this.files.size() != filesNew.size())
 		{
 			return true;
 		}
+		for (int i = 0; i < files.size(); i++)
+		{
+			ShibbyFile fileOld = this.files.get(i);
+			ShibbyFile fileNew = filesNew.get(i);
+			if (!fileOld.getName().equals(fileNew.getName()) ||
+					!fileOld.getDescription().equals(fileNew.getDescription()) ||
+					!fileOld.getTags().equals(fileNew.getTags()))
+			{
+				return true;
+			}
+		}
 		return false;
+	}
+	
+	private List<ShibbyFile> parseDocument(Document doc)
+	{
+		Elements soundsDetails = doc.select("div[class*=sound-details]");
+		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
+		for (Element details : soundsDetails)
+		{
+			String name = details.select("a").text();
+			String link = details.select("a").first().attr("href");
+			String description = details.select("span[class*=soundDescription]").text();
+			files.add(new ShibbyFile(name, link, description));
+		}
+		return files;
 	}
 }

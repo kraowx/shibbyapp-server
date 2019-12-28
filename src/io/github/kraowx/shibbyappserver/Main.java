@@ -11,6 +11,12 @@ public class Main
 	{
 		int port = getIntArg("-port", "-p", DEFAULT_PORT, args);
 		int interval = getIntArg("-interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
+		if ((float)interval/(60*60*1000) < 6)
+		{
+			System.out.println("error - update interval must be greater " +
+					"than or equal to six hours (360 mins)");
+			System.exit(1);
+		}
 		Server server = new Server(port, interval);
 	}
 	
