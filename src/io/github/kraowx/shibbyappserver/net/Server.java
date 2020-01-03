@@ -7,24 +7,21 @@ import io.github.kraowx.shibbyappserver.DataUpdater;
 
 public class Server
 {
-	public static String VERSION = "1.0.5";
+	public static String VERSION = "1.1.0";
 	
-	private int port, interval;
 	private ClientListener clientListener;
 	private DataUpdater dataUpdater;
 	
-	public Server(int port, int interval)
+	public Server(int port, int interval, boolean heavyUpdate)
 	{
-		this.port = port;
-		this.interval = interval;
-		start();
+		start(port, interval, heavyUpdate);
 	}
 	
-	public void start()
+	public void start(int port, int interval, boolean heavyUpdate)
 	{
 		if (clientListener == null)
 		{
-			dataUpdater = new DataUpdater(interval);
+			dataUpdater = new DataUpdater(interval, heavyUpdate);
 			new Timer().scheduleAtFixedRate(new TimerTask()
 			{
 				@Override
@@ -32,7 +29,8 @@ public class Server
 				{
 					if (dataUpdater.isInitialized())
 					{
-						clientListener = new ClientListener(port, dataUpdater);
+						clientListener = new ClientListener(
+								port, dataUpdater);
 						this.cancel();
 					}
 				}

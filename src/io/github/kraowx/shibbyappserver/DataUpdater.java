@@ -2,8 +2,10 @@ package io.github.kraowx.shibbyappserver;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -27,15 +29,18 @@ import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
 public class DataUpdater
 {
 	private int interval;
-	private boolean initialized;
+	private boolean initialized,
+		heavyUpdate, patreonEnabled;
+	private String patreonScriptPath;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags;
 	private MasterList masterList;
 	private Timer timer;
 	
-	public DataUpdater(int interval)
+	public DataUpdater(int interval, boolean heavyUpdate)
 	{
 		this.interval = interval;
+		this.heavyUpdate = heavyUpdate;
 		files = new ArrayList<ShibbyFile>();
 		tags = new ArrayList<ShibbyFileArray>();
 		masterList = new MasterList();
@@ -146,6 +151,7 @@ public class DataUpdater
 		System.out.println(FormattedOutput.get("Starting data update..."));
 		System.out.println(FormattedOutput.get("Updating master file list..."));
 		updateFiles();
+		updatePatreonData();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
 		if (!initialized)
@@ -162,32 +168,93 @@ public class DataUpdater
 	{
 		if (masterList.update())
 		{
-			files = masterList.getFiles();
-			for (int i = 0; i < files.size(); i++)
+			List<ShibbyFile> newFiles = masterList.getFiles();
+			List<ShibbyFile> filesTemp = (List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
+			boolean firstUpdate = files == null || files.isEmpty();
+			if (firstUpdate)
 			{
-				ShibbyFile file = files.get(i);
-				try
+				files = (List<ShibbyFile>)((ArrayList<ShibbyFile>)newFiles).clone();
+			}
+			int filesAdded = 0;
+			final int FILES_SIZE = files.size();
+			for (int i = newFiles.size()-1; i > -1; i--)
+			{
+				ShibbyFile oldFile = null;
+				if (!firstUpdate && FILES_SIZE > i)
 				{
-					System.out.println(FormattedOutput.get("Updating file " +
-							(i+1) + "/" + files.size() + "..."));
-					Document doc = Jsoup.connect(file.getLink()).get();
-					Element js = doc.select("script[type*=text/javascript]").get(1);
-					String jss = js.toString();
-					jss = jss.substring(jss.indexOf("m4a: \"")+6);
-					jss = jss.substring(0, jss.indexOf("\""));
-					file.setLink(jss);
+					oldFile = files.get(FILES_SIZE-1-i);
 				}
-				catch (IOException ioe)
+				ShibbyFile newFile = newFiles.get(newFiles.size()-1-i);
+				if (oldFile == null || heavyUpdate ||
+						!oldFile.equals(newFile))
 				{
-					ioe.printStackTrace();
-					System.out.println(FormattedOutput.get("Failed to update file " +
-							(i+1) + "/" + files.size()));
+					try
+					{
+						System.out.println(FormattedOutput.get("Updating file " +
+								(newFiles.size()-i) + "/" + newFiles.size() + "..."));
+						Document doc = Jsoup.connect(newFile.getLink()).get();
+						Element js = doc.select("script[type*=text/javascript]").get(1);
+						String jss = js.toString();
+						jss = jss.substring(jss.indexOf("m4a: \"")+6);
+						jss = jss.substring(0, jss.indexOf("\""));
+						newFile.setLink(jss);
+						if (firstUpdate || i > FILES_SIZE-1)
+						{
+							filesTemp.add(filesAdded++, newFile);
+						}
+						else
+						{
+							filesTemp.set(FILES_SIZE-1-i, newFile);
+						}
+					}
+					catch (IOException ioe)
+					{
+						ioe.printStackTrace();
+						System.out.println(FormattedOutput.get("Failed to update file " +
+								(newFiles.size()-i) + "/" + newFiles.size()));
+					}
 				}
 			}
+			files = filesTemp;
 		}
 		else
 		{
-			System.out.println(FormattedOutput.get("Master list is up to date."));
+			System.out.println(FormattedOutput.get("\nMaster list is up to date."));
+		}
+	}
+	
+	private void updatePatreonData()
+	{
+		if (patreonEnabled)
+		{
+			Process process;
+			BufferedReader in;
+			List<String> data;
+			try
+			{
+				process = Runtime.getRuntime().exec(patreonScriptPath);
+				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				data = new ArrayList<String>();
+				String line;
+				while (process.isAlive())
+				{
+					line = in.readLine();
+					if (line != null)
+					{
+						data.add(line);
+					}
+				}
+			}
+			catch (FileNotFoundException fnfe)
+			{
+				System.out.println(FormattedOutput.get("ERROR: " +
+						"Invalid path to Patreon script"));
+			}
+			catch (IOException ioe)
+			{
+				System.out.println(FormattedOutput.get("ERROR: Failed to " +
+						"update Patreon data"));
+			}
 		}
 	}
 	

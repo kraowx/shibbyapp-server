@@ -6,18 +6,43 @@ public class Main
 {
 	static int DEFAULT_PORT = 1967;
 	static int DEFAULT_INTERVAL = 24*60;
+	static boolean DEFAULT_HEAVY_UPDATE = false;
 	
 	public static void main(String[] args)
 	{
-		int port = getIntArg("-port", "-p", DEFAULT_PORT, args);
-		int interval = getIntArg("-interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
-		if ((float)interval/(60*60*1000) < 6)
+		int port = getIntArg("--port", "-p", DEFAULT_PORT, args);
+		int interval = getIntArg("--interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
+		boolean heavyUpdate = hasArg("--heavy-update", "-h", false, args);
+		boolean help = hasArg("--help", null, false, args);
+		boolean version = hasArg("--version", null, false, args);
+		if (help)
+		{
+			System.out.println("Usage: exec [-p port] [-i interval] [-h]");
+			System.out.println("Companion server for ShibbyApp that collects, " +
+					"organizes, and distributes Shibby's audio files.");
+			System.out.println("\nOptions:");
+			System.out.println("  -p, --port            specifies the port for the server to run on");
+			System.out.println("  -i, --interval        specifies the interval to update on");
+			System.out.println("  -h, --heavy-update    forces each file to be updated on each update");
+			System.out.println("      --help            display this help and exit");
+			System.out.println("      --version         output version information and exit");
+			System.out.println("\nExit status:");
+			System.out.println("Returns 1 on invalid update interval");
+			System.exit(0);
+		}
+		else if (version)
+		{
+			System.out.println("shibbyapp-server " + Server.VERSION);
+			System.out.println("https://github.com/kraowx/shibbyapp-server");
+			System.exit(0);
+		}
+		else if ((float)interval/(60*60*1000) < 6)
 		{
 			System.out.println("error - update interval must be greater " +
 					"than or equal to six hours (360 mins)");
 			System.exit(1);
 		}
-		Server server = new Server(port, interval);
+		Server server = new Server(port, interval, heavyUpdate);
 	}
 	
 	private static int getIntArg(String arg, String shortArg,
@@ -25,7 +50,7 @@ public class Main
 	{
 		for (int i = 0; i < args.length; i++)
 		{
-			if (args[i].equals(arg) || args[i].equals(shortArg))
+			if ((arg != null && args[i].equals(arg)) || args[i].equals(shortArg))
 			{
 				if (i < args.length-1)
 				{
@@ -39,6 +64,19 @@ public class Main
 						return defaultArg;
 					}
 				}
+			}
+		}
+		return defaultArg;
+	}
+	
+	private static boolean hasArg(String arg, String shortArg,
+			boolean defaultArg, String[] args)
+	{
+		for (String a : args)
+		{
+			if ((arg != null && a.equals(arg)) || a.equals(shortArg))
+			{
+				return true;
 			}
 		}
 		return defaultArg;

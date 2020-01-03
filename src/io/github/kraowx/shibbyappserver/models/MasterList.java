@@ -35,10 +35,6 @@ public class MasterList
 			{
 				this.doc = doc;
 				files = parseDocument(doc);
-				for (ShibbyFile file : files)
-				{
-					System.out.println(file.getShortName());
-				}
 				return true;
 			}
 		}

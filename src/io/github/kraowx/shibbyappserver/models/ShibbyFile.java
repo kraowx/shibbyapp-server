@@ -287,4 +287,15 @@ public class ShibbyFile
 	{
 		return name;
 	}
+	
+	@Override
+	public boolean equals(Object other)
+	{
+		if (other instanceof ShibbyFile)
+		{
+			return this.toJSON().toString().equals(
+					((ShibbyFile)other).toJSON().toString());
+		}
+		return false;
+	}
 }
