@@ -1,5 +1,12 @@
 package io.github.kraowx.shibbyappserver;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import io.github.kraowx.shibbyappserver.net.Server;
 
 public class Main
@@ -15,6 +22,7 @@ public class Main
 		boolean heavyUpdate = hasArg("--heavy-update", "-h", false, args);
 		boolean help = hasArg("--help", null, false, args);
 		boolean version = hasArg("--version", null, false, args);
+		boolean configPatreon = hasArg("--config-patreon", null, false, args);
 		if (help)
 		{
 			System.out.println("Usage: exec [-p port] [-i interval] [-h]");
@@ -26,8 +34,10 @@ public class Main
 			System.out.println("  -h, --heavy-update    forces each file to be updated on each update");
 			System.out.println("      --help            display this help and exit");
 			System.out.println("      --version         output version information and exit");
+			System.out.println("      --config-patreon  setup Patreon integration feature");
 			System.out.println("\nExit status:");
-			System.out.println("Returns 1 on invalid update interval");
+			System.out.println("1  invalid update interval");
+			System.out.println("2  failed to read input");
 			System.exit(0);
 		}
 		else if (version)
@@ -35,6 +45,38 @@ public class Main
 			System.out.println("shibbyapp-server " + Server.VERSION);
 			System.out.println("https://github.com/kraowx/shibbyapp-server");
 			System.exit(0);
+		}
+		else if (configPatreon)
+		{
+			String email = null, password = null;
+			BufferedReader reader = null;
+			BufferedWriter writer = null;
+			try
+			{
+				reader = new BufferedReader(new InputStreamReader(System.in));
+				while (email == null)
+				{
+					System.out.print("Enter the email for your Patreon account: ");
+					email = reader.readLine();
+				}
+				while (password == null)
+				{
+					System.out.print("Enter the password for your Patreon account: ");
+					password = reader.readLine();
+				}
+				File file = new File("shibbyapp-server.config");
+				file.createNewFile();
+				writer = new BufferedWriter(new FileWriter(file));
+				writer.write(email + "\n" + password);
+				writer.close();
+				System.out.println("Configuration saved to " + file.getAbsolutePath());
+				System.exit(0);
+			}
+			catch (IOException ioe)
+			{
+				System.out.println("error - failed to read input");
+				System.exit(2);
+			}
 		}
 		else if ((float)interval/(60*60*1000) < 6)
 		{
