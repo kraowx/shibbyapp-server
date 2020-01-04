@@ -28,10 +28,13 @@ import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
 
 public class DataUpdater
 {
+	public static final String PATREON_SCRIPT_PATH = "patreonScript.py";
+	public static final String CONFIG_FILE_PATH = "shibbyapp-server.config";
+	
 	private int interval;
 	private boolean initialized,
 		heavyUpdate, patreonEnabled;
-	private String patreonScriptPath;
+	private String patreonData;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags;
 	private MasterList masterList;
@@ -41,10 +44,25 @@ public class DataUpdater
 	{
 		this.interval = interval;
 		this.heavyUpdate = heavyUpdate;
+		init();
+		start();
+	}
+	
+	private void init()
+	{
 		files = new ArrayList<ShibbyFile>();
 		tags = new ArrayList<ShibbyFileArray>();
 		masterList = new MasterList();
-		start();
+		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
+		patreonEnabled = isPatreonEnabled();
+		if (patreonEnabled)
+		{
+			System.out.println(FormattedOutput.get("Patreon updates ENABLED"));
+		}
+		else
+		{
+			System.out.println(FormattedOutput.get("Patreon updates DISABLED"));
+		}
 	}
 	
 	public void start()
@@ -149,9 +167,13 @@ public class DataUpdater
 	{
 		long startTime = Calendar.getInstance().getTime().getTime();
 		System.out.println(FormattedOutput.get("Starting data update..."));
+		if (patreonEnabled)
+		{
+			System.out.println(FormattedOutput.get("Updating Patreon data..."));
+			updatePatreonData();
+		}
 		System.out.println(FormattedOutput.get("Updating master file list..."));
 		updateFiles();
-		updatePatreonData();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
 		if (!initialized)
@@ -229,21 +251,53 @@ public class DataUpdater
 		{
 			Process process;
 			BufferedReader in;
-			List<String> data;
 			try
 			{
-				process = Runtime.getRuntime().exec(patreonScriptPath);
+				String[] creds = getPatreonCredentials();
+				process = Runtime.getRuntime().exec("python3 " + PATREON_SCRIPT_PATH +
+						" " + creds[0] + " " + creds[1]);
 				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				data = new ArrayList<String>();
+				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
+						"must be verified by clicking link in email";
+				final String TOO_MANY_REQUESTS_RESPONSE = "error - too many requests";
+				final String UNKNOWN_ERROR_RESPONSE = "error - unknown";
 				String line;
 				while (process.isAlive())
 				{
 					line = in.readLine();
 					if (line != null)
 					{
-						data.add(line);
+						switch (line)
+						{
+							case EMAIL_CONFIRM_RESPONSE:
+								System.out.println(FormattedOutput.get("ERROR: This " +
+										"device must be verified to access your " +
+										"Patreon account by clicking the link in your " +
+										"email USING ONLY THIS DEVICE"));
+								return;
+							case TOO_MANY_REQUESTS_RESPONSE:
+								System.out.println(FormattedOutput.get("ERROR: Too many " +
+										"requests sent to Patreon. Update not completed"));
+								return;
+							case UNKNOWN_ERROR_RESPONSE:
+								System.out.println(FormattedOutput.get("ERROR: Unknown " +
+										"Patreon connection error"));
+								return;
+						}
+						if (line.startsWith("file - "))
+						{
+							String[] data = line.split(" - ");
+							System.out.println(FormattedOutput.get(
+									"Found Patreon file: \"" + data[1]) + "\"");
+						}
+						else if (line.startsWith("json - "))
+						{
+							String[] data = line.split(" - ");
+							patreonData = data[1];
+						}
 					}
 				}
+				in.close();
 			}
 			catch (FileNotFoundException fnfe)
 			{
@@ -334,7 +388,8 @@ public class DataUpdater
 			{
 				chars[i] = Character.toUpperCase(c);
 			}
-			else if (c == ' ' && i+1 < chars.length && Character.isLowerCase(chars[i+1]))
+			else if (c == ' ' && i+1 < chars.length &&
+					Character.isLowerCase(chars[i+1]))
 			{
 				chars[i+1] = Character.toUpperCase(chars[i+1]);
 			}
@@ -353,5 +408,92 @@ public class DataUpdater
 			}
 		}
 		return -1;
+	}
+	
+	private String[] getPatreonCredentials()
+	{
+		String[] creds = new String[2];
+		File configFile = new File("shibbyapp-server.config");
+		BufferedReader reader;
+		try
+		{
+			reader = new BufferedReader(new FileReader(configFile));
+			creds[0] = reader.readLine();
+			creds[1] = reader.readLine();
+			reader.close();
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+		}
+		return creds;
+	}
+	
+	private boolean isPatreonEnabled()
+	{
+		File scriptFile = new File("patreonScript.py");
+		File configFile = new File("shibbyapp-server.config");
+		boolean exists = true;
+		if (!scriptFile.exists())
+		{
+			System.out.println(FormattedOutput.get(
+					"Missing file: \"patreonScript.py\""));
+			exists = false;
+		}
+		if (!configFile.exists())
+		{
+			System.out.println(FormattedOutput.get(
+					"Missing file: \"shibbyapp-server.config\""));
+			exists = false;
+		}
+		if (!exists)
+		{
+			return false;
+		}
+		String email = null, password = null;
+		BufferedReader reader;
+		try
+		{
+			reader = new BufferedReader(new FileReader(configFile));
+			email = reader.readLine();
+			password = reader.readLine();
+			reader.close();
+			if (email != null && password != null)
+			{
+				Process process = Runtime.getRuntime().exec("python3 " +
+						scriptFile.getAbsolutePath() + " -v " +
+						email + " " + password);
+				BufferedReader in = new BufferedReader(
+						new InputStreamReader(process.getInputStream()));
+				final String VALID_ACCOUNT_RESPONSE = "login valid";
+				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
+						"must be verified by clicking link in email";
+				String line;
+				while (process.isAlive())
+				{
+					line = in.readLine();
+					if (line != null)
+					{
+						switch (line)
+						{
+							case VALID_ACCOUNT_RESPONSE:
+								return true;
+							case EMAIL_CONFIRM_RESPONSE:
+								System.out.println(FormattedOutput.get("ERROR: This " +
+										"device must be verified to access your " +
+										"Patreon account by clicking the link in your " +
+										"email USING ONLY THIS DEVICE"));
+								return false;
+						}
+					}
+				}
+				in.close();
+			}
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+		}
+		return false;
 	}
 }

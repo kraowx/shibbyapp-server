@@ -127,20 +127,24 @@ def parseTags(content):
                 tag += c
     return tags
 
+postsJson = []
 posts = json.loads(scraper.get("https://patreon.com/api/stream") \
     .content.decode("utf-8"))
 while ("next" in posts["links"]):
     for post in posts["data"]:
         if isShibbyAudioPost(post):
-            name = post["attributes"]["title"]
+            name = post["attributes"]["title"].lstrip()
             links = getLinks(post)
             content = post["attributes"]["content"]
             tags = parseTags(content)
             date = post["attributes"]["created_at"].split("T")[0]
-            print("name:", name, "  links:", links, "  tags:", tags, "  date:", date, "\n")
+            postJson = {"name":name, "links":links, "description":content, "tags":tags}
+            postsJson.append(postJson)
+            print("file -", name)
+            #print("name:", name, "  links:", links, "  tags:", tags, "  date:", date, "\n")
     nextPosts = "https://" + posts["links"]["next"]
     posts = json.loads(scraper.get(nextPosts).content.decode("utf-8"))
-
+print("json -", postsJson)
 
 # https://patreon.com/api/campaigns/322138/posts?page[count]=<NUM_POSTS>    (retrieves posts/threads from a creator's campaign)
 # https://patreon.com/api/stream    (retrieves current_user's post from subscribed campaigns)

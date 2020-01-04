@@ -25,7 +25,7 @@ public class Main
 		boolean configPatreon = hasArg("--config-patreon", null, false, args);
 		if (help)
 		{
-			System.out.println("Usage: exec [-p port] [-i interval] [-h]");
+			System.out.println("Usage: exec [-h] [-p port] [-i interval]");
 			System.out.println("Companion server for ShibbyApp that collects, " +
 					"organizes, and distributes Shibby's audio files.");
 			System.out.println("\nOptions:");
@@ -64,10 +64,10 @@ public class Main
 					System.out.print("Enter the password for your Patreon account: ");
 					password = reader.readLine();
 				}
-				File file = new File("shibbyapp-server.config");
+				File file = new File(DataUpdater.CONFIG_FILE_PATH);
 				file.createNewFile();
 				writer = new BufferedWriter(new FileWriter(file));
-				writer.write(email + "\n" + password);
+				writer.write(email + "\n" + password + "\n");
 				writer.close();
 				System.out.println("Configuration saved to " + file.getAbsolutePath());
 				System.exit(0);
