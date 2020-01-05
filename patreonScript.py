@@ -12,6 +12,7 @@
 #       was unable to find an alternative solution.
 import sys
 import json
+import unicodedata
 
 try:
     import cfscrape
@@ -133,19 +134,22 @@ posts = json.loads(scraper.get("https://patreon.com/api/stream") \
 while ("next" in posts["links"]):
     for post in posts["data"]:
         if isShibbyAudioPost(post):
-            name = post["attributes"]["title"].lstrip()
+            name = post["attributes"]["title"].lstrip().rstrip()
             links = getLinks(post)
-            content = post["attributes"]["content"]
+            content = unicodedata.normalize("NFKD", post["attributes"]["content"])
             tags = parseTags(content)
             date = post["attributes"]["created_at"].split("T")[0]
             postJson = {"name":name, "links":links, "description":content, "tags":tags}
             postsJson.append(postJson)
-            print("file -", name)
+            print("file -", name, flush=True)
             #print("name:", name, "  links:", links, "  tags:", tags, "  date:", date, "\n")
     nextPosts = "https://" + posts["links"]["next"]
     posts = json.loads(scraper.get(nextPosts).content.decode("utf-8"))
-print("json -", postsJson)
+print("json -", postsJson, flush=True)
+with open("patreonData.json", "w") as file:
+    file.write(json.dumps(postsJson))
+
 
 # https://patreon.com/api/campaigns/322138/posts?page[count]=<NUM_POSTS>    (retrieves posts/threads from a creator's campaign)
-# https://patreon.com/api/stream    (retrieves current_user's post from subscribed campaigns)
+# https://patreon.com/api/stream    (retrieves current_user's posts from subscribed campaigns)
 # https://patreon.com/file?h=<POST_ID>&i=<ATTACHMENT_ID>    (downloads an attachment; ex: audio file)
