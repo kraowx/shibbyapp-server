@@ -105,32 +105,33 @@ public class ClientHandler implements Runnable
 		{
 			return new Response(ResponseType.FEATURE_NOT_SUPPORTED, null);
 		}
-		boolean verified = false;
+		int verified = 0;
 		if (request.getData() != null)
 		{
 			JSONObject data = new JSONObject(request.getData());
-			if (dataUpdater.getVerifiedPatreonEmails().contains(data.getString("email")))
-			{
-				verified = true;
-			}
-			else
-			{
-				verified = dataUpdater.isAccountVerified(
-						data.getString("email"), data.getString("password"));
-			}
+			verified = dataUpdater.isAccountVerified(
+					data.getString("email"), data.getString("password"));
 		}
-		if (verified)
+		if (verified == 1)
 		{
 			return new Response(ResponseType.PATREON_FILES,
 					dataUpdater.getPatreonJSON());
 		}
-		else
+		else if (verified == 2)
 		{
 			JSONArray arr = new JSONArray();
 			JSONObject verifiedJson = new JSONObject();
 			verifiedJson.put("verified", verified);
 			arr.put(verifiedJson);
 			return new Response(ResponseType.VERIFY_PATREON_ACCOUNT, arr);
+		}
+		else if (verified == 3)
+		{
+			return new Response(ResponseType.TOO_MANY_REQUESTS, null);
+		}
+		else
+		{
+			return new Response(ResponseType.BAD_ACCOUNT, null);
 		}
 	}
 }

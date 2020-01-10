@@ -129,6 +129,7 @@ def parseTags(content):
     return tags
 
 postsJson = []
+postNames = []
 posts = json.loads(scraper.get("https://patreon.com/api/stream") \
     .content.decode("utf-8"))
 while ("next" in posts["links"]):
@@ -139,10 +140,11 @@ while ("next" in posts["links"]):
             content = unicodedata.normalize("NFKD", post["attributes"]["content"])
             tags = parseTags(content)
             date = post["attributes"]["created_at"].split("T")[0]
-            postJson = {"name":name, "links":links, "description":content, "tags":tags}
-            postsJson.append(postJson)
-            print("file -", name, flush=True)
-            #print("name:", name, "  links:", links, "  tags:", tags, "  date:", date, "\n")
+            if len(links) == 1 and name not in postNames:
+                postJson = {"name":name, "links":links, "description":content, "tags":tags, "isPatreonFile":True}
+                postsJson.append(postJson)
+                postNames.append(name)
+                print("file -", name, flush=True)
     nextPosts = "https://" + posts["links"]["next"]
     posts = json.loads(scraper.get(nextPosts).content.decode("utf-8"))
 print("json -", postsJson, flush=True)

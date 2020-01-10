@@ -211,6 +211,10 @@ public class ShibbyFile
 	
 	private String getShortName(String name)
 	{
+		if (name == null)
+		{
+			return null;
+		}
 		String tags = "";
 		char[] chars = name.toCharArray();
 		boolean in = true;
