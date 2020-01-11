@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -91,7 +90,7 @@ public class MasterList
 			String name = details.select("a").text();
 			String link = details.select("a").first().attr("href");
 			String description = details.select("span[class*=soundDescription]").text();
-			files.add(new ShibbyFile(name, link, description));
+			files.add(new ShibbyFile(name, link, description, "soundgasm"));
 		}
 		return files;
 	}
