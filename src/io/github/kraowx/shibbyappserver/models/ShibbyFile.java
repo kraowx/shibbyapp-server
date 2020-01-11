@@ -13,26 +13,27 @@ import org.json.JSONObject;
 
 public class ShibbyFile
 {
-	private String name, shortName, id, link, description;
+	private String name, shortName, id,
+		link, description, type;
 	private List<String> tags;
 	private Map<String, String> extraData;
 	
 	public ShibbyFile(String name, String link,
-			String description)
+			String description, String type)
 	{
-		init(name, null, null, link, description, null);
+		init(name, null, null, link, description, type, null);
 	}
 	
 	public ShibbyFile(String name, String id,
 			List<String> tags, String link, String description,
-			Map<String, String> extraData)
+			String type, Map<String, String> extraData)
 	{
-		init(name, id, tags, link, description, extraData);
+		init(name, id, tags, link, description, type, extraData);
 	}
 	
 	private void init(String name, String id,
 			List<String> tags, String link, String description,
-			Map<String, String> extraData)
+			String type, Map<String, String> extraData)
 	{
 		this.name = name;
 		this.shortName = getShortName(name);
@@ -50,6 +51,7 @@ public class ShibbyFile
 		}
 		this.link = link;
 		this.description = description;
+		this.type = type;
 		this.extraData = extraData != null ? extraData :
 			new HashMap<String, String>();
 	}
@@ -67,6 +69,7 @@ public class ShibbyFile
 		json.put("tags", tagsJson);
 		json.put("link", link);
 		json.put("description", description);
+		json.put("type", type);
 		JSONObject extras = new JSONObject();
 		for (String key : extraData.keySet())
 		{
@@ -78,7 +81,7 @@ public class ShibbyFile
 	
 	public static ShibbyFile fromJSON(String jsonStr)
     {
-        ShibbyFile file = new ShibbyFile(null, null, null);
+        ShibbyFile file = new ShibbyFile(null, null, null, null);
         JSONObject json = new JSONObject(jsonStr);
         file.name = json.getString("name");
         if (json.has("shortName"))
@@ -111,6 +114,14 @@ public class ShibbyFile
         }
         file.link = json.getString("link");
         file.description = json.getString("description");
+        if (!json.has("type"))
+        {
+        	file.type = "";
+        }
+        else
+        {
+        	file.type = json.getString("type");
+        }
         file.extraData = new HashMap<String, String>();
         JSONObject extras = json.getJSONObject("extras");
         for (String key : extras.keySet())
@@ -158,6 +169,16 @@ public class ShibbyFile
 	public void setLink(String link)
 	{
 		this.link = link;
+	}
+	
+	public String getType()
+	{
+		return type;
+	}
+	
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 	
 	public String getDescription()

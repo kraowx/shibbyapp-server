@@ -141,7 +141,7 @@ while ("next" in posts["links"]):
             tags = parseTags(content)
             date = post["attributes"]["created_at"].split("T")[0]
             if len(links) == 1 and name not in postNames:
-                postJson = {"name":name, "links":links, "description":content, "tags":tags, "isPatreonFile":True}
+                postJson = {"name":name, "links":links, "description":content, "tags":tags, "isPatreonFile":True, "type":"patreon"}
                 postsJson.append(postJson)
                 postNames.append(name)
                 print("file -", name, flush=True)
