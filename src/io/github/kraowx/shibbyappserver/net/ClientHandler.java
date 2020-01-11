@@ -59,14 +59,16 @@ public class ClientHandler implements Runnable
 			case VERIFY_PATREON_ACCOUNT:
 				return getVerifiedAccountResponse(request);
 			case ALL:
-				return new Response(ResponseType.ALL,
-						dataUpdater.getAllJSON());
+//				return new Response(ResponseType.ALL,
+//						dataUpdater.getAllJSON());
+				return getAllResponse(request);
 			case FILES:
 				return new Response(ResponseType.FILES,
 						dataUpdater.getFilesJSON());
 			case TAGS:
-				return new Response(ResponseType.TAGS,
-						dataUpdater.getTagsJSON());
+//				return new Response(ResponseType.TAGS,
+//						dataUpdater.getTagsJSON());
+				return getTagsResponse(request);
 			case SERIES:
 				return new Response(ResponseType.SERIES,
 						dataUpdater.getSeriesJSON());
@@ -133,5 +135,39 @@ public class ClientHandler implements Runnable
 		{
 			return new Response(ResponseType.BAD_ACCOUNT, null);
 		}
+	}
+	
+	private Response getTagsResponse(Request request)
+	{
+		int verified = 0;
+		if (request.getData() != null)
+		{
+			JSONObject data = new JSONObject(request.getData());
+			verified = dataUpdater.isAccountVerified(
+					data.getString("email"), data.getString("password"));
+		}
+		if (verified == 1)
+		{
+			return new Response(ResponseType.TAGS,
+					dataUpdater.getTagsWithPatreonJSON());
+		}
+		else
+		{
+			return new Response(ResponseType.TAGS,
+					dataUpdater.getTagsJSON());
+		}
+	}
+	
+	private Response getAllResponse(Request request)
+	{
+		int verified = 0;
+		if (request.getData() != null)
+		{
+			JSONObject data = new JSONObject(request.getData());
+			verified = dataUpdater.isAccountVerified(
+					data.getString("email"), data.getString("password"));
+		}
+		return new Response(ResponseType.ALL,
+				dataUpdater.getAllJSON(verified == 1));
 	}
 }

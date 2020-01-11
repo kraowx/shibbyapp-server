@@ -112,7 +112,14 @@ public class ShibbyFile
 	        	file.tags.add((String)tag);
 	        }
         }
-        file.link = json.getString("link");
+        if (json.has("link"))
+        {
+            file.link = json.getString("link");
+        }
+        else if (json.has("links"))
+        {
+            file.link = json.getJSONArray("links").getString(0);
+        }
         file.description = json.getString("description");
         if (!json.has("type"))
         {
@@ -123,10 +130,13 @@ public class ShibbyFile
         	file.type = json.getString("type");
         }
         file.extraData = new HashMap<String, String>();
-        JSONObject extras = json.getJSONObject("extras");
-        for (String key : extras.keySet())
+        if (json.has("extras"))
         {
-        	file.extraData.put(key, extras.getString(key));
+	        JSONObject extras = json.getJSONObject("extras");
+	        for (String key : extras.keySet())
+	        {
+	        	file.extraData.put(key, extras.getString(key));
+	        }
         }
         return file;
     }

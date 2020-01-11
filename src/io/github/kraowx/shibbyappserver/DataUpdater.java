@@ -38,7 +38,7 @@ public class DataUpdater
 	private boolean initialized,
 		heavyUpdate, patreonEnabled;
 	private List<ShibbyFile> files;
-	private List<ShibbyFileArray> tags;
+	private List<ShibbyFileArray> tags, tagsWithPatreon;
 	private JSONArray patreonFiles;
 	private MasterList masterList;
 	private Timer timer;
@@ -55,10 +55,12 @@ public class DataUpdater
 	{
 		files = new ArrayList<ShibbyFile>();
 		tags = new ArrayList<ShibbyFileArray>();
+		tagsWithPatreon = new ArrayList<ShibbyFileArray>();
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
 		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
-		patreonEnabled = checkPatreonEnabled();
+//		patreonEnabled = checkPatreonEnabled();
+		patreonEnabled = true;
 		if (patreonEnabled)
 		{
 			System.out.println(FormattedOutput.get("Patreon updates ENABLED"));
@@ -90,19 +92,23 @@ public class DataUpdater
 		return patreonEnabled;
 	}
 	
-	public JSONArray getAllJSON()
+	public JSONArray getAllJSON(boolean patreon)
 	{
 		JSONArray files = getFilesJSON();
-		JSONArray tags = getTagsJSON();
+		JSONArray tags = null;
+		if (patreon)
+		{
+			tags = getTagsWithPatreonJSON();
+		}
+		else
+		{
+			tags = getTagsJSON();
+		}
 		JSONArray series = getSeriesJSON();
 		JSONObject all = new JSONObject();
 		all.put("files", files);
 		all.put("tags", tags);
 		all.put("series", series);
-		if (patreonEnabled)
-		{
-			all.put("patreonFiles", patreonFiles);
-		}
 		JSONArray allArr = new JSONArray();
 		allArr.put(all);
 		return allArr;
@@ -122,6 +128,24 @@ public class DataUpdater
 	{
 		JSONArray arr = new JSONArray();
 		for (ShibbyFileArray tag : tags)
+		{
+			JSONObject objTag = new JSONObject();
+			objTag.put("name", tag.getName());
+			JSONArray arrTag = new JSONArray();
+			for (ShibbyFile file : tag.getFiles())
+			{
+				arrTag.put(file.getId());
+			}
+			objTag.put("files", arrTag);
+			arr.put(objTag);
+		}
+		return arr;
+	}
+	
+	public JSONArray getTagsWithPatreonJSON()
+	{
+		JSONArray arr = new JSONArray();
+		for (ShibbyFileArray tag : tagsWithPatreon)
 		{
 			JSONObject objTag = new JSONObject();
 			objTag.put("name", tag.getName());
@@ -282,43 +306,43 @@ public class DataUpdater
 			BufferedReader in;
 			try
 			{
-				String[] creds = getPatreonCredentials();
-				process = Runtime.getRuntime().exec("python3 " + PATREON_SCRIPT_PATH +
-						" " + creds[0] + " " + creds[1]);
-				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
-						"must be verified by clicking link in email";
-				final String TOO_MANY_REQUESTS_RESPONSE = "error - too many requests";
-				final String UNKNOWN_ERROR_RESPONSE = "error - unknown";
-				String line;
-				while ((line = in.readLine()) != null)
-				{
-					switch (line)
-					{
-						case EMAIL_CONFIRM_RESPONSE:
-							System.out.println(FormattedOutput.get("ERROR: This " +
-									"device must be verified to access your " +
-									"Patreon account by clicking the link in your " +
-									"email USING ONLY THIS DEVICE"));
-							return;
-						case TOO_MANY_REQUESTS_RESPONSE:
-							System.out.println(FormattedOutput.get("ERROR: Too many " +
-									"requests sent to Patreon. Update not completed"));
-							return;
-						case UNKNOWN_ERROR_RESPONSE:
-							System.out.println(FormattedOutput.get("ERROR: Unknown " +
-									"Patreon connection error"));
-							return;
-					}
-					if (line.startsWith("file - "))
-					{
-						String[] data = line.split(" - ");
-						System.out.println(FormattedOutput.get(
-								"Found Patreon file: \"" + data[1]) + "\"");
-					}
-				}
-				process.waitFor();
-				in.close();
+//				String[] creds = getPatreonCredentials();
+//				process = Runtime.getRuntime().exec("python3 " + PATREON_SCRIPT_PATH +
+//						" " + creds[0] + " " + creds[1]);
+//				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
+//						"must be verified by clicking link in email";
+//				final String TOO_MANY_REQUESTS_RESPONSE = "error - too many requests";
+//				final String UNKNOWN_ERROR_RESPONSE = "error - unknown";
+//				String line;
+//				while ((line = in.readLine()) != null)
+//				{
+//					switch (line)
+//					{
+//						case EMAIL_CONFIRM_RESPONSE:
+//							System.out.println(FormattedOutput.get("ERROR: This " +
+//									"device must be verified to access your " +
+//									"Patreon account by clicking the link in your " +
+//									"email USING ONLY THIS DEVICE"));
+//							return;
+//						case TOO_MANY_REQUESTS_RESPONSE:
+//							System.out.println(FormattedOutput.get("ERROR: Too many " +
+//									"requests sent to Patreon. Update not completed"));
+//							return;
+//						case UNKNOWN_ERROR_RESPONSE:
+//							System.out.println(FormattedOutput.get("ERROR: Unknown " +
+//									"Patreon connection error"));
+//							return;
+//					}
+//					if (line.startsWith("file - "))
+//					{
+//						String[] data = line.split(" - ");
+//						System.out.println(FormattedOutput.get(
+//								"Found Patreon file: \"" + data[1]) + "\"");
+//					}
+//				}
+//				process.waitFor();
+//				in.close();
 				
 				BufferedReader reader = new BufferedReader(
 						new FileReader(new File(PATREON_DATA_PATH)));
@@ -347,52 +371,65 @@ public class DataUpdater
 				System.out.println(FormattedOutput.get("ERROR: Failed to " +
 						"update Patreon data"));
 			}
-			catch (InterruptedException ie)
-			{
-				ie.printStackTrace();
-			}
+//			catch (InterruptedException ie)
+//			{
+//				ie.printStackTrace();
+//			}
 		}
 	}
 	
 	private void updateTags()
 	{
 		tags.clear();
-		for (ShibbyFile file : files)
+		tagsWithPatreon.clear();
+		updateListTags(files, tags);
+		if (patreonEnabled)
 		{
-			for (String tag : file.getTags())
-			{
-				tag = toTitleCase(tag);
-				int index = indexOfTag(tag);
-				if (index != -1)
-				{
-					if (getBetterTag(tag, tags.get(index).getName()).equals(tag))
-					{
-						tags.get(index).setName(tag);
-					}
-					tags.get(index).addFile(file);
-				}
-				else
-				{
-					tags.add(new ShibbyFileArray(tag,
-							new ShibbyFile[]{file}, null));
-				}
-			}
+			updateListTags(files, tagsWithPatreon);
+			updateListTags(parsePatreonFiles(patreonFiles), tagsWithPatreon);
+			filterTags(tagsWithPatreon);
+			Collections.sort(tagsWithPatreon, new SortByFileCount());
 		}
 		System.out.println(FormattedOutput.get("Filtering tags..."));
-		filterTags();
+		filterTags(tags);
 		System.out.println(FormattedOutput.get("Sorting tags..."));
 		Collections.sort(tags, new SortByFileCount());
 	}
 	
-	private void filterTags()
+	private void updateListTags(List<ShibbyFile> list, List<ShibbyFileArray> tagsList)
+	{
+		for (ShibbyFile file : list)
+		{
+			for (String tag : file.getTags())
+			{
+				tag = toTitleCase(tag);
+				int index = indexOfTag(tag, tagsList);
+				if (index != -1)
+				{
+					if (getBetterTag(tag, tagsList.get(index).getName()).equals(tag))
+					{
+						tagsList.get(index).setName(tag);
+					}
+					tagsList.get(index).addFile(file);
+				}
+				else
+				{
+					tagsList.add(new ShibbyFileArray(tag,
+							new ShibbyFile[]{file}, null));
+				}
+			}
+		}
+	}
+	
+	private void filterTags(List<ShibbyFileArray> tagsList)
 	{
 		List<ShibbyFileArray> temp =
-				(List<ShibbyFileArray>)((ArrayList)tags).clone();
+				(List<ShibbyFileArray>)((ArrayList)tagsList).clone();
 		for (ShibbyFileArray tag : temp)
 		{
 			if (tag.getFileCount() == 1)
 			{
-				tags.remove(tag);
+				tagsList.remove(tag);
 			}
 		}
 	}
@@ -439,17 +476,27 @@ public class DataUpdater
 		return new String(chars);
 	}
 	
-	private int indexOfTag(String tag)
+	private int indexOfTag(String tag, List<ShibbyFileArray> tagsList)
 	{
-		for (int i = 0; i < tags.size(); i++)
+		for (int i = 0; i < tagsList.size(); i++)
 		{
-			if (tags.get(i).getName().toLowerCase()
+			if (tagsList.get(i).getName().toLowerCase()
 					.equals(tag.toLowerCase()))
 			{
 				return i;
 			}
 		}
 		return -1;
+	}
+	
+	private List<ShibbyFile> parsePatreonFiles(JSONArray patreonFiles)
+	{
+		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
+		for (int i = 0; i < patreonFiles.length(); i++)
+		{
+			files.add(ShibbyFile.fromJSON(patreonFiles.getJSONObject(i).toString()));
+		}
+		return files;
 	}
 	
 	private String[] getPatreonCredentials()
