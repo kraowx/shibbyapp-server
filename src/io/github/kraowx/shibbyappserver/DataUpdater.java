@@ -59,8 +59,7 @@ public class DataUpdater
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
 		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
-//		patreonEnabled = checkPatreonEnabled();
-		patreonEnabled = true;
+		patreonEnabled = checkPatreonEnabled();
 		if (patreonEnabled)
 		{
 			System.out.println(FormattedOutput.get("Patreon updates ENABLED"));
@@ -306,43 +305,43 @@ public class DataUpdater
 			BufferedReader in;
 			try
 			{
-//				String[] creds = getPatreonCredentials();
-//				process = Runtime.getRuntime().exec("python3 " + PATREON_SCRIPT_PATH +
-//						" " + creds[0] + " " + creds[1]);
-//				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
-//						"must be verified by clicking link in email";
-//				final String TOO_MANY_REQUESTS_RESPONSE = "error - too many requests";
-//				final String UNKNOWN_ERROR_RESPONSE = "error - unknown";
-//				String line;
-//				while ((line = in.readLine()) != null)
-//				{
-//					switch (line)
-//					{
-//						case EMAIL_CONFIRM_RESPONSE:
-//							System.out.println(FormattedOutput.get("ERROR: This " +
-//									"device must be verified to access your " +
-//									"Patreon account by clicking the link in your " +
-//									"email USING ONLY THIS DEVICE"));
-//							return;
-//						case TOO_MANY_REQUESTS_RESPONSE:
-//							System.out.println(FormattedOutput.get("ERROR: Too many " +
-//									"requests sent to Patreon. Update not completed"));
-//							return;
-//						case UNKNOWN_ERROR_RESPONSE:
-//							System.out.println(FormattedOutput.get("ERROR: Unknown " +
-//									"Patreon connection error"));
-//							return;
-//					}
-//					if (line.startsWith("file - "))
-//					{
-//						String[] data = line.split(" - ");
-//						System.out.println(FormattedOutput.get(
-//								"Found Patreon file: \"" + data[1]) + "\"");
-//					}
-//				}
-//				process.waitFor();
-//				in.close();
+				String[] creds = getPatreonCredentials();
+				process = Runtime.getRuntime().exec("python3 " + PATREON_SCRIPT_PATH +
+						" " + creds[0] + " " + creds[1]);
+				in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				final String EMAIL_CONFIRM_RESPONSE = "error - this device " +
+						"must be verified by clicking link in email";
+				final String TOO_MANY_REQUESTS_RESPONSE = "error - too many requests";
+				final String UNKNOWN_ERROR_RESPONSE = "error - unknown";
+				String line;
+				while ((line = in.readLine()) != null)
+				{
+					switch (line)
+					{
+						case EMAIL_CONFIRM_RESPONSE:
+							System.out.println(FormattedOutput.get("ERROR: This " +
+									"device must be verified to access your " +
+									"Patreon account by clicking the link in your " +
+									"email USING ONLY THIS DEVICE"));
+							return;
+						case TOO_MANY_REQUESTS_RESPONSE:
+							System.out.println(FormattedOutput.get("ERROR: Too many " +
+									"requests sent to Patreon. Update not completed"));
+							return;
+						case UNKNOWN_ERROR_RESPONSE:
+							System.out.println(FormattedOutput.get("ERROR: Unknown " +
+									"Patreon connection error"));
+							return;
+					}
+					if (line.startsWith("file - "))
+					{
+						String[] data = line.split(" - ");
+						System.out.println(FormattedOutput.get(
+								"Found Patreon file: \"" + data[1]) + "\"");
+					}
+				}
+				process.waitFor();
+				in.close();
 				
 				BufferedReader reader = new BufferedReader(
 						new FileReader(new File(PATREON_DATA_PATH)));
@@ -371,10 +370,10 @@ public class DataUpdater
 				System.out.println(FormattedOutput.get("ERROR: Failed to " +
 						"update Patreon data"));
 			}
-//			catch (InterruptedException ie)
-//			{
-//				ie.printStackTrace();
-//			}
+			catch (InterruptedException ie)
+			{
+				ie.printStackTrace();
+			}
 		}
 	}
 	

@@ -59,15 +59,11 @@ public class ClientHandler implements Runnable
 			case VERIFY_PATREON_ACCOUNT:
 				return getVerifiedAccountResponse(request);
 			case ALL:
-//				return new Response(ResponseType.ALL,
-//						dataUpdater.getAllJSON());
 				return getAllResponse(request);
 			case FILES:
 				return new Response(ResponseType.FILES,
 						dataUpdater.getFilesJSON());
 			case TAGS:
-//				return new Response(ResponseType.TAGS,
-//						dataUpdater.getTagsJSON());
 				return getTagsResponse(request);
 			case SERIES:
 				return new Response(ResponseType.SERIES,
