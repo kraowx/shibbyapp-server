@@ -243,20 +243,21 @@ public class DataUpdater
 			boolean firstUpdate = files == null || files.isEmpty();
 			if (firstUpdate)
 			{
-				files = (List<ShibbyFile>)((ArrayList<ShibbyFile>)newFiles).clone();
+				files = masterList.readLocalList();
+				filesTemp = (List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
 			}
 			int filesAdded = 0;
 			final int FILES_SIZE = files.size();
 			for (int i = newFiles.size()-1; i > -1; i--)
 			{
 				ShibbyFile oldFile = null;
-				if (!firstUpdate && FILES_SIZE > i)
+				if (FILES_SIZE > i)
 				{
 					oldFile = files.get(FILES_SIZE-1-i);
 				}
 				ShibbyFile newFile = newFiles.get(newFiles.size()-1-i);
 				if (oldFile == null || heavyUpdate ||
-						!oldFile.equals(newFile))
+						!filesMostlyEqual(oldFile, newFile))
 				{
 					try
 					{
@@ -268,7 +269,7 @@ public class DataUpdater
 						jss = jss.substring(jss.indexOf("m4a: \"")+6);
 						jss = jss.substring(0, jss.indexOf("\""));
 						newFile.setLink(jss);
-						if (firstUpdate || i > FILES_SIZE-1)
+						if (i > FILES_SIZE-1)
 						{
 							filesTemp.add(filesAdded++, newFile);
 						}
@@ -482,6 +483,13 @@ public class DataUpdater
 			}
 		}
 		return -1;
+	}
+	
+	private boolean filesMostlyEqual(ShibbyFile file1, ShibbyFile file2)
+	{
+		return file1.getName().equals(file2.getName()) &&
+				file1.getDescription().equals(file2.getDescription()) &&
+				file1.getTags().equals(file2.getTags());
 	}
 	
 	private List<ShibbyFile> parsePatreonFiles(JSONArray patreonFiles)

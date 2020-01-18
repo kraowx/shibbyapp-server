@@ -55,18 +55,25 @@ public class MasterList
 	private boolean updateNeeded(Document doc)
 	{
 		List<ShibbyFile> filesNew = new ArrayList<ShibbyFile>();
+		List<ShibbyFile> docFiles = parseDocument(doc);
+		// Load cached files
 		if (this.doc == null)
 		{
 			filesNew = files = readLocalList();
 		}
-		if (this.doc != null || filesNew.isEmpty())
+		// If filesNew does not contain the latest files, update it
+		if (this.doc != null || filesNew.isEmpty() ||
+				!docFiles.toString().equals(filesNew.toString()))
 		{
-			filesNew = parseDocument(doc);
+			filesNew = docFiles;
 		}
+		// Files have been added or removed from master
 		if (this.files.size() != filesNew.size())
 		{
 			return true;
 		}
+		// Lists are the same size, so compare each file to check
+		// for any difference between their contents
 		for (int i = 0; i < files.size(); i++)
 		{
 			ShibbyFile fileOld = this.files.get(i);
@@ -120,7 +127,7 @@ public class MasterList
 		}
 	}
 	
-	private List<ShibbyFile> readLocalList()
+	public List<ShibbyFile> readLocalList()
 	{
 		List<ShibbyFile> list = new ArrayList<ShibbyFile>();
 		StringBuilder sb = new StringBuilder();
