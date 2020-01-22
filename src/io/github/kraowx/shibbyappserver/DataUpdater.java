@@ -285,14 +285,12 @@ public class DataUpdater
 			int j = 0, filesAdded = 0;
 			for (int i = 0; i < newFiles.size(); i++)
 			{
-				ShibbyFile oldFile = files.get(j);
-				ShibbyFile newFile = newFiles.get(i);
-				if (oldFile.getName().equals(newFile.getName()))
+				ShibbyFile oldFile = null;
+				if (j < files.size())
 				{
-					// Iterate through the local list separately
-					// from the updated list
-					j++;
+					oldFile = files.get(j);
 				}
+				ShibbyFile newFile = newFiles.get(i);
 				if (oldFile == null || heavyUpdate ||
 						!filesMostlyEqual(oldFile, newFile))
 				{
@@ -312,7 +310,7 @@ public class DataUpdater
 						jss = jss.substring(jss.indexOf("m4a: \"")+6);
 						jss = jss.substring(0, jss.indexOf("\""));
 						newFile.setLink(jss);
-						if (oldFile.getName().equals(newFile.getName()))
+						if (oldFile != null && oldFile.getName().equals(newFile.getName()))
 						{
 							// If a local file with the same name already exists,
 							// update the existing file with the contents of the new file
@@ -331,6 +329,12 @@ public class DataUpdater
 						System.out.println(FormattedOutput.get("Failed to update file " +
 								(newFiles.size()-i) + "/" + newFiles.size()));
 					}
+				}
+				if (oldFile != null && oldFile.getName().equals(newFile.getName()))
+				{
+					// Iterate through the local list separately
+					// from the updated list
+					j++;
 				}
 			}
 			files = filesTemp;
