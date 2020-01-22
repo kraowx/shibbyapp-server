@@ -1,11 +1,9 @@
 package io.github.kraowx.shibbyappserver;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -70,6 +68,9 @@ public class DataUpdater
 		}
 	}
 	
+	/*
+	 * Starts the update timer to update every interval.
+	 */
 	public void start()
 	{
 		if (timer == null)
@@ -91,6 +92,12 @@ public class DataUpdater
 		return patreonEnabled;
 	}
 	
+	/*
+	 * Returns all available data in JSON format (except for Patreon tags).
+	 * If patreon=true then Patreon tags will also be included.
+	 * Patreon data is *not* included to improve app loading time. This
+	 * may be changed in the future however.
+	 */
 	public JSONArray getAllJSON(boolean patreon)
 	{
 		JSONArray files = getFilesJSON();
@@ -113,6 +120,9 @@ public class DataUpdater
 		return allArr;
 	}
 	
+	/*
+	 * Returns soundgasm file data in JSON format.
+	 */
 	public JSONArray getFilesJSON()
 	{
 		JSONArray arr = new JSONArray();
@@ -123,6 +133,9 @@ public class DataUpdater
 		return arr;
 	}
 	
+	/*
+	 * Returns tags data in JSON format *without* Patreon files.
+	 */
 	public JSONArray getTagsJSON()
 	{
 		JSONArray arr = new JSONArray();
@@ -141,6 +154,9 @@ public class DataUpdater
 		return arr;
 	}
 	
+	/*
+	 * Returns tags data in JSON format *with* Patreon files.
+	 */
 	public JSONArray getTagsWithPatreonJSON()
 	{
 		JSONArray arr = new JSONArray();
@@ -159,6 +175,9 @@ public class DataUpdater
 		return arr;
 	}
 	
+	/*
+	 * Returns series data from the disk (already in JSON format).
+	 */
 	public JSONArray getSeriesJSON()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -194,6 +213,9 @@ public class DataUpdater
 		return arr;
 	}
 	
+	/*
+	 * Returns Patreon file data in JSON format.
+	 */
 	public JSONArray getPatreonJSON()
 	{
 		JSONArray arr = new JSONArray();
@@ -208,6 +230,10 @@ public class DataUpdater
 		return initialized;
 	}
 	
+	/*
+	 * Performs a full update. This is done in the following order: update Patreon files,
+	 * update soundgasm files, update tags, filter tags, sort tags.
+	 */
 	private void update()
 	{
 		long startTime = Calendar.getInstance().getTime().getTime();
@@ -234,48 +260,69 @@ public class DataUpdater
 				duration + " seconds."));
 	}
 	
+	/*
+	 * Attempts to update soundgasm files by first checking if
+	 * an update is required. If so, each local file will be
+	 * compared with the latest file to check for differences.
+	 */
 	private void updateFiles()
 	{
-		if (masterList.update())
+		// Only update if the local master list and the
+		// latest master list are not identical
+		if (masterList.update(heavyUpdate))
 		{
 			List<ShibbyFile> newFiles = masterList.getFiles();
-			List<ShibbyFile> filesTemp = (List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
+			// A buffer is used so that the indices are not changed
+			// when the list is changed
+			List<ShibbyFile> filesTemp =
+					(List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
 			boolean firstUpdate = files == null || files.isEmpty();
 			if (firstUpdate)
 			{
 				files = masterList.readLocalList();
 				filesTemp = (List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
 			}
-			int filesAdded = 0;
-			final int FILES_SIZE = files.size();
-			for (int i = newFiles.size()-1; i > -1; i--)
+			int j = 0, filesAdded = 0;
+			for (int i = 0; i < newFiles.size(); i++)
 			{
-				ShibbyFile oldFile = null;
-				if (FILES_SIZE > i)
+				ShibbyFile oldFile = files.get(j);
+				ShibbyFile newFile = newFiles.get(i);
+				if (oldFile.getName().equals(newFile.getName()))
 				{
-					oldFile = files.get(FILES_SIZE-1-i);
+					// Iterate through the local list separately
+					// from the updated list
+					j++;
 				}
-				ShibbyFile newFile = newFiles.get(newFiles.size()-1-i);
 				if (oldFile == null || heavyUpdate ||
 						!filesMostlyEqual(oldFile, newFile))
 				{
 					try
 					{
 						System.out.println(FormattedOutput.get("Updating file " +
-								(newFiles.size()-i) + "/" + newFiles.size() + "..."));
+								(i+1) + "/" + newFiles.size() + "..."));
+						/*
+						 * Retrieve the actual audio file link from soundgasm.
+						 * This becomes a somewhat intensive action when repeated
+						 * hundreds of times, which is why files must only be updated
+						 * if an update is actually needed
+						 */
 						Document doc = Jsoup.connect(newFile.getLink()).get();
 						Element js = doc.select("script[type*=text/javascript]").get(1);
 						String jss = js.toString();
 						jss = jss.substring(jss.indexOf("m4a: \"")+6);
 						jss = jss.substring(0, jss.indexOf("\""));
 						newFile.setLink(jss);
-						if (i > FILES_SIZE-1)
+						if (oldFile.getName().equals(newFile.getName()))
 						{
-							filesTemp.add(filesAdded++, newFile);
+							// If a local file with the same name already exists,
+							// update the existing file with the contents of the new file
+							filesTemp.set(j + filesAdded, newFile);
 						}
 						else
 						{
-							filesTemp.set(FILES_SIZE-1-i, newFile);
+							// If the file does not exist, add it at the
+							// current position in the list
+							filesTemp.add(i, newFile);
 						}
 					}
 					catch (IOException ioe)
@@ -290,7 +337,8 @@ public class DataUpdater
 		}
 		else
 		{
-			System.out.println(FormattedOutput.get("Master list is up to date."));
+			System.out.println(FormattedOutput.
+					get("Master list is up to date."));
 		}
 		if (files == null || files.isEmpty())
 		{
@@ -298,6 +346,11 @@ public class DataUpdater
 		}
 	}
 	
+	/*
+	 * Updates Patreon files (if enabled) regardless of whether
+	 * an update is available or not. It is simply not possible
+	 * to tell using the current method.
+	 */
 	private void updatePatreonData()
 	{
 		if (patreonEnabled)
@@ -334,6 +387,11 @@ public class DataUpdater
 									"Patreon connection error"));
 							return;
 					}
+					/*
+					 * The script reports a new file has been found.
+					 * This is purely so the user can see that the script is
+					 * doing something while it is running in the background.
+					 */
 					if (line.startsWith("file - "))
 					{
 						String[] data = line.split(" - ");
@@ -374,6 +432,10 @@ public class DataUpdater
 		}
 	}
 	
+	/*
+	 * Performs a full update of tags including file updating,
+	 * filtering, and sorting for both soundgasm and Patreon files.
+	 */
 	private void updateTags()
 	{
 		tags.clear();
@@ -392,7 +454,11 @@ public class DataUpdater
 		Collections.sort(tags, new SortByFileCount());
 	}
 	
-	private void updateListTags(List<ShibbyFile> list, List<ShibbyFileArray> tagsList)
+	/*
+	 * Updates a local list of tags to include any new files.
+	 */
+	private void updateListTags(List<ShibbyFile> list,
+			List<ShibbyFileArray> tagsList)
 	{
 		for (ShibbyFile file : list)
 		{
@@ -402,14 +468,25 @@ public class DataUpdater
 				int index = indexOfTag(tag, tagsList);
 				if (index != -1)
 				{
-					if (getBetterTag(tag, tagsList.get(index).getName()).equals(tag))
+					if (getBetterTag(tag, tagsList.get(index)
+							.getName()).equals(tag))
 					{
+						/*
+						 * Associated file has an equivalent but
+						 * more visually appealing tag, so replace the
+						 * tag with the associated file tag
+						 * (this process continues until the most visually
+						 * appealing tag is found)
+						 */
 						tagsList.get(index).setName(tag);
 					}
+					// Tag exists in the record, so add the
+					// associated file to the tag
 					tagsList.get(index).addFile(file);
 				}
 				else
 				{
+					// Tag does not yet exist in the record, so add it
 					tagsList.add(new ShibbyFileArray(tag,
 							new ShibbyFile[]{file}, null));
 				}
@@ -417,6 +494,12 @@ public class DataUpdater
 		}
 	}
 	
+	/*
+	 * Removes unneeded/unwanted tags by:
+	 * - Removing tags that have less than two
+	 *   files associated with them
+	 * - (more filtering techniques will be added)
+	 */
 	private void filterTags(List<ShibbyFileArray> tagsList)
 	{
 		List<ShibbyFileArray> temp =
@@ -440,6 +523,9 @@ public class DataUpdater
 				tag1 : tag2;
 	}
 	
+	/*
+	 * Returns the number of upper case letters in a string.
+	 */
 	private int getCapitalLetterCount(String str)
 	{
 		int capitals = 0;
@@ -453,6 +539,10 @@ public class DataUpdater
 		return capitals;
 	}
 	
+	/*
+	 * Converts the first letter of each word
+	 * in a string to upper case.
+	 */
 	private String toTitleCase(String str)
 	{
 		char[] chars = str.toCharArray();
@@ -461,17 +551,25 @@ public class DataUpdater
 			char c = chars[i];
 			if (i == 0)
 			{
+				// The first letter is always upper case
+				// (unless it is not a letter?)
 				chars[i] = Character.toUpperCase(c);
 			}
 			else if (c == ' ' && i+1 < chars.length &&
 					Character.isLowerCase(chars[i+1]))
 			{
+				// The character after a space is upper case
+				// (if it exists)
 				chars[i+1] = Character.toUpperCase(chars[i+1]);
 			}
 		}
 		return new String(chars);
 	}
 	
+	/*
+	 * Returns the index of a tag in a list, or -1 if the
+	 * tag is not in the list.
+	 */
 	private int indexOfTag(String tag, List<ShibbyFileArray> tagsList)
 	{
 		for (int i = 0; i < tagsList.size(); i++)
@@ -485,6 +583,10 @@ public class DataUpdater
 		return -1;
 	}
 	
+	/*
+	 * Checks if the names, tags, and descriptions of two files match.
+	 * On the surface, files are nearly identical at this point.
+	 */
 	private boolean filesMostlyEqual(ShibbyFile file1, ShibbyFile file2)
 	{
 		return file1.getName().equals(file2.getName()) &&
@@ -492,6 +594,9 @@ public class DataUpdater
 				file1.getTags().equals(file2.getTags());
 	}
 	
+	/*
+	 * Converts a JSON array of Patreon files into a list of shibbyfiles.
+	 */
 	private List<ShibbyFile> parsePatreonFiles(JSONArray patreonFiles)
 	{
 		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
@@ -502,6 +607,10 @@ public class DataUpdater
 		return files;
 	}
 	
+	/*
+	 * Returns the user's Patreon credentials from the
+	 * file if they exist.
+	 */
 	private String[] getPatreonCredentials()
 	{
 		String[] creds = new String[2];
@@ -521,6 +630,12 @@ public class DataUpdater
 		return creds;
 	}
 	
+	/*
+	 * Attempts to check if the user's credentials (email + password)
+	 * belong to a Patreon account that exists and that has an
+	 * active pledge to Shibby. This method communicates with the
+	 * python script "patreonScript.py" in order to retrieve the data.
+	 */
 	public int isAccountVerified(String email, String password)
 	{
 		try
@@ -528,6 +643,7 @@ public class DataUpdater
 			if (email != null && password != null)
 			{
 				File scriptFile = new File("patreonScript.py");
+				// Start the script on a new process in the background
 				Process process = Runtime.getRuntime().exec("python3 " +
 						scriptFile.getAbsolutePath() + " -v " +
 						email + " " + password);
@@ -545,13 +661,16 @@ public class DataUpdater
 					{
 						switch (line)
 						{
+							// Account has been verified
 							case VALID_ACCOUNT_RESPONSE:
 								return 1;
+							// Patreon api has too many requests for the linked account
 							case TOO_MANY_REQUESTS_RESPONSE:
 								System.out.println(FormattedOutput.get("ERROR: Too many " +
 										"requests have been sent to Patreon. " +
 										"Try again in 10 minutes"));
 								return 3;
+							// Account requires email confirmation to be used with this device
 							case EMAIL_CONFIRM_RESPONSE:
 								System.out.println(FormattedOutput.get("ERROR: This " +
 										"device must be verified to access your " +
@@ -571,6 +690,11 @@ public class DataUpdater
 		return 0;
 	}
 	
+	/*
+	 * Checks if the server can connect to Patreon by #1-checking if the
+	 * user has set up the required files #2-checking if the user's
+	 * Patreon account is valid and usable.
+	 */
 	private boolean checkPatreonEnabled()
 	{
 		File scriptFile = new File("patreonScript.py");

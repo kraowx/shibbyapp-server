@@ -33,12 +33,16 @@ public class MasterList
 		return files;
 	}
 	
-	public boolean update()
+	/*
+	 * Updates the master list only if an update is required.
+	 * Can be overridden to force an update.
+	 */
+	public boolean update(boolean force)
 	{
 		try
 		{
 			Document doc = Jsoup.connect(MASTER_LIST_URL).get();
-			if (updateNeeded(doc))
+			if (force || updateNeeded(doc))
 			{
 				this.doc = doc;
 				files = parseDocument(doc);
@@ -52,6 +56,10 @@ public class MasterList
 		return false;
 	}
 	
+	/*
+	 * Check if an update is actually required by comparing
+	 * the local master list with the latest version.
+	 */
 	private boolean updateNeeded(Document doc)
 	{
 		List<ShibbyFile> filesNew = new ArrayList<ShibbyFile>();
@@ -88,6 +96,9 @@ public class MasterList
 		return false;
 	}
 	
+	/*
+	 * Converts an HTML formatted master list to a list of shibbyfiles.
+	 */
 	private List<ShibbyFile> parseDocument(Document doc)
 	{
 		Elements soundsDetails = doc.select("div[class*=sound-details]");
@@ -102,6 +113,10 @@ public class MasterList
 		return files;
 	}
 	
+	/*
+	 * Converts a list of shibbyfiles to JSON format and writes it
+	 * to the local master list on the disk.
+	 */
 	public void writeLocalList(List<ShibbyFile> list)
 	{
 		JSONArray arr = new JSONArray();
@@ -127,6 +142,10 @@ public class MasterList
 		}
 	}
 	
+	/*
+	 * Reads the local master list from the disk and converts
+	 * it to a list of shibbyfiles.
+	 */
 	public List<ShibbyFile> readLocalList()
 	{
 		List<ShibbyFile> list = new ArrayList<ShibbyFile>();

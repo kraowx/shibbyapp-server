@@ -84,6 +84,12 @@ public class Main
 					"than or equal to six hours (360 mins)");
 			System.exit(1);
 		}
+		else if (heavyUpdate)
+		{
+			System.out.println("WARNING: You have enabled heavy update. " +
+					"This will not only cause the server to take longer to update, " +
+					"but it will also put more stress on the soundgasm servers");
+		}
 		Server server = new Server(port, interval, heavyUpdate);
 	}
 	
