@@ -20,6 +20,9 @@ public class Main
 		int port = getIntArg("--port", "-p", DEFAULT_PORT, args);
 		int interval = getIntArg("--interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
 		boolean heavyUpdate = hasArg("--heavy-update", "-h", false, args);
+		boolean noUpdate = hasArg("--no-update", "-n", false, args);
+		boolean noSoundgasm = hasArg("--no-soundgasm", null, false, args);
+		boolean noPatreon = hasArg("--no-patreon", null, false, args);
 		boolean help = hasArg("--help", null, false, args);
 		boolean version = hasArg("--version", null, false, args);
 		boolean configPatreon = hasArg("--config-patreon", null, false, args);
@@ -32,6 +35,9 @@ public class Main
 			System.out.println("  -p, --port            specifies the port for the server to run on");
 			System.out.println("  -i, --interval        specifies the interval to update on");
 			System.out.println("  -h, --heavy-update    forces each file to be updated on each update");
+			System.out.println("  -n  --no-update       initial data update is skipped");
+			System.out.println("        --no-soundgasm  initial soundgasm update is skipped");
+			System.out.println("        --no-patreon    initial patreon update is skipped");
 			System.out.println("      --help            display this help and exit");
 			System.out.println("      --version         output version information and exit");
 			System.out.println("      --config-patreon  setup Patreon integration feature");
@@ -90,7 +96,20 @@ public class Main
 					"This will not only cause the server to take longer to update, " +
 					"but it will also put more stress on the soundgasm servers");
 		}
-		Server server = new Server(port, interval, heavyUpdate);
+		int initialUpdate = 0;
+		if (noSoundgasm)
+		{
+			initialUpdate = 1;
+		}
+		if (noPatreon)
+		{
+			initialUpdate = 2;
+		}
+		if (noUpdate || (noSoundgasm && noPatreon))
+		{
+			initialUpdate = 3;
+		}
+		Server server = new Server(port, interval, heavyUpdate, initialUpdate);
 	}
 	
 	private static int getIntArg(String arg, String shortArg,

@@ -12,16 +12,16 @@ public class Server
 	private ClientListener clientListener;
 	private DataUpdater dataUpdater;
 	
-	public Server(int port, int interval, boolean heavyUpdate)
+	public Server(int port, int interval, boolean heavyUpdate, int initialUpdate)
 	{
-		start(port, interval, heavyUpdate);
+		start(port, interval, heavyUpdate, initialUpdate);
 	}
 	
-	public void start(int port, int interval, boolean heavyUpdate)
+	public void start(int port, int interval, boolean heavyUpdate, int initialUpdate)
 	{
 		if (clientListener == null)
 		{
-			dataUpdater = new DataUpdater(interval, heavyUpdate);
+			dataUpdater = new DataUpdater(interval, heavyUpdate, initialUpdate);
 			new Timer().scheduleAtFixedRate(new TimerTask()
 			{
 				@Override

@@ -32,7 +32,7 @@ public class DataUpdater
 	public static final String PATREON_DATA_PATH = "patreonData.json";
 	public static final String CONFIG_FILE_PATH = "shibbyapp-server.config";
 	
-	private int interval;
+	private int interval, initialUpdate;
 	private boolean initialized,
 		heavyUpdate, patreonEnabled;
 	private List<ShibbyFile> files;
@@ -41,10 +41,11 @@ public class DataUpdater
 	private MasterList masterList;
 	private Timer timer;
 	
-	public DataUpdater(int interval, boolean heavyUpdate)
+	public DataUpdater(int interval, boolean heavyUpdate, int initialUpdate)
 	{
 		this.interval = interval;
 		this.heavyUpdate = heavyUpdate;
+		this.initialUpdate = initialUpdate;
 		init();
 		start();
 	}
@@ -237,22 +238,43 @@ public class DataUpdater
 	private void update()
 	{
 		long startTime = Calendar.getInstance().getTime().getTime();
-		System.out.println(FormattedOutput.get("Starting data update..."));
-		if (patreonEnabled)
+		if (initialUpdate != 3)
+		{
+			System.out.println(FormattedOutput.get("Starting data update..."));
+		}
+		else
+		{
+			System.out.println(FormattedOutput.get("Starting local data update..."));
+		}
+		if (patreonEnabled && initialUpdate != 2 && initialUpdate != 3)
 		{
 			System.out.println(FormattedOutput.get("Updating Patreon data..."));
 			updatePatreonData();
 		}
-		System.out.println(FormattedOutput.get("Updating soundgasm master file list..."));
+		if (initialUpdate == 0 || initialUpdate == 2)
+		{
+			System.out.println(FormattedOutput.get("Updating soundgasm master file list..."));
+		}
+		else
+		{
+			System.out.println(FormattedOutput.get("Retrieving local soundgasm master file list..."));
+		}
 		updateFiles();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
-		System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
-				MasterList.LOCAL_LIST_PATH + "'..."));
-		masterList.writeLocalList(files);
+		if (initialUpdate == 0 || initialUpdate == 2)
+		{
+			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
+					MasterList.LOCAL_LIST_PATH + "'..."));
+			masterList.writeLocalList(files);
+		}
 		if (!initialized)
 		{
 			initialized = true;
+		}
+		if (initialUpdate > 0)
+		{
+			initialUpdate = 0;
 		}
 		long endTime = Calendar.getInstance().getTime().getTime();
 		float duration = (float)(endTime - startTime)/1000;
@@ -269,7 +291,8 @@ public class DataUpdater
 	{
 		// Only update if the local master list and the
 		// latest master list are not identical
-		if (masterList.update(heavyUpdate))
+		if ((initialUpdate == 0 || initialUpdate == 2) &&
+				masterList.update(heavyUpdate))
 		{
 			List<ShibbyFile> newFiles = masterList.getFiles();
 			// A buffer is used so that the indices are not changed
@@ -339,10 +362,14 @@ public class DataUpdater
 			}
 			files = filesTemp;
 		}
-		else
+		else if (initialUpdate != 1 && initialUpdate != 3)
 		{
 			System.out.println(FormattedOutput.
 					get("Master list is up to date."));
+		}
+		else if (initialUpdate == 1 || initialUpdate == 3)
+		{
+			files = masterList.readLocalList();
 		}
 		if (files == null || files.isEmpty())
 		{
@@ -357,7 +384,7 @@ public class DataUpdater
 	 */
 	private void updatePatreonData()
 	{
-		if (patreonEnabled)
+		if (patreonEnabled && initialUpdate != 2 && initialUpdate != 3)
 		{
 			Process process;
 			BufferedReader in;
