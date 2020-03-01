@@ -44,6 +44,7 @@ public class Main
 			System.out.println("\nExit status:");
 			System.out.println("1  invalid update interval");
 			System.out.println("2  failed to read input");
+			System.out.println("3  failed to start the server");
 			System.exit(0);
 		}
 		else if (version)
@@ -117,7 +118,8 @@ public class Main
 		catch (IOException ioe)
 		{
 			ioe.printStackTrace();
-			System.out.println("ERROR: failed to start the server");
+			System.out.println("ERROR: Failed to start the server");
+			System.exit(3);
 		}
 	}
 	

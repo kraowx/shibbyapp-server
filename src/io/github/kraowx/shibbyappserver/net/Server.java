@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import fi.iki.elonen.NanoHTTPD;
 import io.github.kraowx.shibbyappserver.DataUpdater;
 import io.github.kraowx.shibbyappserver.Main;
+import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 
 public class Server extends NanoHTTPD
 {
@@ -19,12 +20,14 @@ public class Server extends NanoHTTPD
 	private String html;
 	private DataUpdater dataUpdater;
 	
-	public Server(int port, int interval, boolean heavyUpdate, int initialUpdate) throws IOException
+	public Server(int port, int interval, boolean heavyUpdate,
+			int initialUpdate) throws IOException
 	{
 		super(getPort());
 		html = getHtml();
 		dataUpdater = new DataUpdater(interval, heavyUpdate, initialUpdate);
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+		System.out.println(FormattedOutput.get("Server started on port " + getPort() + "."));
 	}
 	
 	@Override
