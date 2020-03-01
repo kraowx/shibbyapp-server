@@ -442,24 +442,28 @@ public class DataUpdater
 				ie.printStackTrace();
 			}
 		}
-		try
+		File file = new File(PATREON_DATA_PATH);
+		if (file.exists())
 		{
-			BufferedReader reader = new BufferedReader(
-					new FileReader(new File(PATREON_DATA_PATH)));
-			String json = reader.readLine();
-			reader.close();
-			if (json != null)
+			try
 			{
-				patreonFiles = new JSONArray(json);
+				BufferedReader reader = new BufferedReader(
+						new FileReader(file));
+				String json = reader.readLine();
+				reader.close();
+				if (json != null)
+				{
+					patreonFiles = new JSONArray(json);
+				}
+				else
+				{
+					patreonFiles = new JSONArray();
+				}
 			}
-			else
+			catch (IOException ioe)
 			{
-				patreonFiles = new JSONArray();
+				ioe.printStackTrace();
 			}
-		}
-		catch (IOException ioe)
-		{
-			ioe.printStackTrace();
 		}
 	}
 	

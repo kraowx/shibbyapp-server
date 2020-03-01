@@ -124,7 +124,7 @@ public class Server extends NanoHTTPD
 		}
 		catch (IOException ioe)
 		{
-			ioe.printStackTrace();
+			return "<html>The \"index.html\" file could not be located.</html>";
 		}
 		return html.toString();
 	}
