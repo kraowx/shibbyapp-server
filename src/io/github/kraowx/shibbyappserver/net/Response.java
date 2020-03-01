@@ -1,18 +1,24 @@
 package io.github.kraowx.shibbyappserver.net;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Response
 {
 	private ResponseType respType;
-	private JSONArray data;
+	private JSONObject data;
 	
-	public Response(ResponseType respType, JSONArray data)
+	public Response(ResponseType respType, JSONObject data)
 	{
 		this.respType = respType;
 		this.data = data;
+		this.data.put("type", respType);
 	}
+	
+	public static Response INVALID_REQUEST =
+			new Response(ResponseType.INVALID_REQUEST, new JSONObject());
+	public static Response OUTDATED_CLIENT =
+			new Response(ResponseType.OUTDATED_CLIENT, new JSONObject());
+	public static Response VERSION = getVersionResponse();
 	
 	public static Response fromJSON(String json)
 	{
@@ -24,17 +30,14 @@ public class Response
 		}
 		if (obj.has("data"))
 		{
-			resp.data = obj.getJSONArray("data");
+			resp.data = obj.getJSONObject("data");
 		}
 		return resp;
 	}
 	
 	public JSONObject toJSON()
 	{
-		JSONObject json = new JSONObject();
-		json.put("type", respType.toString());
-		json.put("data", data);
-		return json;
+		return data;
 	}
 	
 	public ResponseType getType()
@@ -42,7 +45,7 @@ public class Response
 		return respType;
 	}
 	
-	public JSONArray getData()
+	public JSONObject getData()
 	{
 		return data;
 	}
@@ -57,6 +60,13 @@ public class Response
 			}
 		}
 		return null;
+	}
+	
+	private static Response getVersionResponse()
+	{
+		JSONObject obj = new JSONObject();
+		obj.put("data", Server.VERSION);
+		return new Response(ResponseType.VERSION, obj);
 	}
 	
 	@Override

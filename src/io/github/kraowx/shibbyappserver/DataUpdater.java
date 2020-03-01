@@ -99,7 +99,7 @@ public class DataUpdater
 	 * Patreon data is *not* included to improve app loading time. This
 	 * may be changed in the future however.
 	 */
-	public JSONArray getAllJSON(boolean patreon)
+	public JSONObject getAllJSON(boolean patreon)
 	{
 		JSONArray files = getFilesJSON();
 		JSONArray tags = null;
@@ -116,9 +116,7 @@ public class DataUpdater
 		all.put("files", files);
 		all.put("tags", tags);
 		all.put("series", series);
-		JSONArray allArr = new JSONArray();
-		allArr.put(all);
-		return allArr;
+		return all;
 	}
 	
 	/*
@@ -219,11 +217,7 @@ public class DataUpdater
 	 */
 	public JSONArray getPatreonJSON()
 	{
-		JSONArray arr = new JSONArray();
-		JSONObject obj = new JSONObject();
-		obj.put("patreonFiles", patreonFiles);
-		arr.put(obj);
-		return arr;
+		return patreonFiles;
 	}
 	
 	public boolean isInitialized()
@@ -249,8 +243,8 @@ public class DataUpdater
 		if (patreonEnabled && initialUpdate != 2 && initialUpdate != 3)
 		{
 			System.out.println(FormattedOutput.get("Updating Patreon data..."));
-			updatePatreonData();
 		}
+		updatePatreonData();
 		if (initialUpdate == 0 || initialUpdate == 2)
 		{
 			System.out.println(FormattedOutput.get("Updating soundgasm master file list..."));
@@ -432,19 +426,6 @@ public class DataUpdater
 				}
 				process.waitFor();
 				in.close();
-				
-				BufferedReader reader = new BufferedReader(
-						new FileReader(new File(PATREON_DATA_PATH)));
-				String json = reader.readLine();
-				reader.close();
-				if (json != null)
-				{
-					patreonFiles = new JSONArray(json);
-				}
-				else
-				{
-					patreonFiles = new JSONArray();
-				}
 			}
 			catch (FileNotFoundException fnfe)
 			{
@@ -460,6 +441,25 @@ public class DataUpdater
 			{
 				ie.printStackTrace();
 			}
+		}
+		try
+		{
+			BufferedReader reader = new BufferedReader(
+					new FileReader(new File(PATREON_DATA_PATH)));
+			String json = reader.readLine();
+			reader.close();
+			if (json != null)
+			{
+				patreonFiles = new JSONArray(json);
+			}
+			else
+			{
+				patreonFiles = new JSONArray();
+			}
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
 		}
 	}
 	

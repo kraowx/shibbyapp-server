@@ -1,30 +1,34 @@
 package io.github.kraowx.shibbyappserver.net;
 
+import java.util.Map;
+
 import org.json.JSONObject;
 
 public class Request
 {
 	private RequestType reqType;
-	private String data;
+	private JSONObject data;
 	
 	public Request(RequestType reqType, String data)
 	{
 		this.reqType = reqType;
-		this.data = data;
+		this.data = new JSONObject(data);
+	}
+	
+	public Request(Map<String, String> parms)
+	{
+		this.reqType = getRequestType(parms.containsKey("type") ?
+				parms.get("type") : "");
+		this.data = new JSONObject(parms);
 	}
 	
 	public static Request fromJSON(String json)
 	{
-		Request req = new Request(null, null);
+		Request req = new Request(null);
 		JSONObject obj = new JSONObject(json);
-		if (obj.has("type"))
-		{
-			req.reqType = formatRequestType(obj.getString("type"));
-		}
-		if (obj.has("data"))
-		{
-			req.data = obj.getString("data");
-		}
+		req.reqType = getRequestType(obj.has("type") ?
+				obj.getString("type") : "");
+		req.data = new JSONObject(json);
 		return req;
 	}
 	
@@ -50,10 +54,7 @@ public class Request
 	
 	public JSONObject toJSON()
 	{
-		JSONObject json = new JSONObject();
-		json.put("type", reqType.toString());
-		json.put("data", data);
-		return json;
+		return data;
 	}
 	
 	public RequestType getType()
@@ -61,12 +62,17 @@ public class Request
 		return reqType;
 	}
 	
-	public String getData()
+	public JSONObject getData()
 	{
 		return data;
 	}
 	
-	private static RequestType formatRequestType(String requestStr)
+	public void setData(JSONObject data)
+	{
+		this.data = data;
+	}
+	
+	private static RequestType getRequestType(String requestStr)
 	{
 		for (RequestType type : RequestType.values())
 		{
