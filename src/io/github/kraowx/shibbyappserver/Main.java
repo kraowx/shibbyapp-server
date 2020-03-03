@@ -11,7 +11,7 @@ import io.github.kraowx.shibbyappserver.net.Server;
 
 public class Main
 {
-	public static int DEFAULT_PORT = 1967;
+	static int DEFAULT_PORT = 1967;
 	static int DEFAULT_INTERVAL = 24*60;
 	static boolean DEFAULT_HEAVY_UPDATE = false;
 	
@@ -117,8 +117,8 @@ public class Main
 		}
 		catch (IOException ioe)
 		{
-			ioe.printStackTrace();
 			System.out.println("ERROR: Failed to start the server");
+			ioe.printStackTrace();
 			System.exit(3);
 		}
 	}

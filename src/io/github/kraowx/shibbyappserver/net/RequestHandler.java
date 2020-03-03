@@ -43,8 +43,8 @@ public class RequestHandler
 	 * Attempts to check if the client's credentials (email + password)
 	 * belong to a Patreon account that exists and that has an
 	 * active pledge to Shibby. Returns a VERIFY_PATREON_ACCOUNT with
-	 * data {"verified":true} if verified, or a VERIFY_PATREON_ACCOUNT with
-	 * data {"verified":false} if not verified. May also return a FEATURE_NOT_SUPPORTED
+	 * {"data": true} if verified, or a VERIFY_PATREON_ACCOUNT with
+	 * {"data": false} if not verified. May also return a FEATURE_NOT_SUPPORTED
 	 * response if the patreonEnabled is false for the server.
 	 */
 	private static Response getVerifiedAccountResponse(Request request,
@@ -72,8 +72,9 @@ public class RequestHandler
 	/*
 	 * Returns a PATREON_FILES response with data containing the Patreon files
 	 * only if the client's credentials can be verified. Otherwise, may return
-	 * a number of other responses: FEATURE_NOT_SUPPORTED, VERIFY_PATREON_ACCOUNT
-	 * (with verified=false), TOO_MANY_REQUESTS, or BAD_ACCOUNT
+	 * a number of other responses: FEATURE_NOT_SUPPORTED (no data),
+	 * VERIFY_PATREON_ACCOUNT (no data), TOO_MANY_REQUESTS (no data),
+	 * or BAD_ACCOUNT (no data).
 	 */
 	private static Response getPatreonFilesResponse(Request request,
 			DataUpdater dataUpdater)
@@ -91,20 +92,25 @@ public class RequestHandler
 		}
 		if (verified == 1)
 		{
+			/* Account is valid */
 			return new Response(ResponseType.PATREON_FILES,
 					getDataObject(dataUpdater.getPatreonJSON()));
 		}
 		else if (verified == 2)
 		{
+			/* Account requires email verification */
 			return new Response(ResponseType.VERIFY_PATREON_ACCOUNT,
-					getDataObject(verified));
+					new JSONObject());
 		}
 		else if (verified == 3)
 		{
-			return new Response(ResponseType.TOO_MANY_REQUESTS, new JSONObject());
+			/* API requests from the account are being throttled for 10 mins */
+			return new Response(ResponseType.TOO_MANY_REQUESTS,
+					new JSONObject());
 		}
 		else
 		{
+			/* Account is invalid */
 			return new Response(ResponseType.BAD_ACCOUNT, new JSONObject());
 		}
 	}
@@ -125,11 +131,13 @@ public class RequestHandler
 		}
 		if (verified == 1)
 		{
+			/* Soundgasm + Patreon tags */
 			return new Response(ResponseType.TAGS,
 					getDataObject(dataUpdater.getTagsWithPatreonJSON()));
 		}
 		else
 		{
+			/* Soundgasm tags only */
 			return new Response(ResponseType.TAGS,
 					getDataObject(dataUpdater.getTagsJSON()));
 		}
@@ -153,6 +161,10 @@ public class RequestHandler
 				getDataObject(dataUpdater.getAllJSON(verified == 1)));
 	}
 	
+	/*
+	 * Wraps a json array object in a json object under the name "data".
+	 * Placed directly into the json of a response object.
+	 */
 	private static JSONObject getDataObject(JSONArray arr)
 	{
 		JSONObject obj = new JSONObject();
@@ -160,6 +172,10 @@ public class RequestHandler
 		return obj;
 	}
 	
+	/*
+	 * Wraps a json object in another json object under the name "data".
+	 * Placed directly into the json of a response object.
+	 */
 	private static JSONObject getDataObject(JSONObject obj)
 	{
 		JSONObject objData = new JSONObject();
@@ -167,6 +183,10 @@ public class RequestHandler
 		return objData;
 	}
 	
+	/*
+	 * Wraps a integer value in a json object under the name "data".
+	 * Placed directly into the json of a response object.
+	 */
 	private static JSONObject getDataObject(int val)
 	{
 		JSONObject obj = new JSONObject();
@@ -174,6 +194,10 @@ public class RequestHandler
 		return obj;
 	}
 	
+	/*
+	 * Wraps a boolean value in a json object under the name "data".
+	 * Placed directly into the json of a response object.
+	 */
 	private static JSONObject getDataObject(boolean val)
 	{
 		JSONObject obj = new JSONObject();
