@@ -33,7 +33,7 @@ public class Main
 					"organizes, and distributes Shibby's audio files.");
 			System.out.println("\nOptions:");
 			System.out.println("  -p, --port            specifies the port for the server to run on");
-			System.out.println("  -i, --interval        specifies the interval to update on");
+			System.out.println("  -i, --interval        specifies the interval to update on in minutes");
 			System.out.println("  -h, --heavy-update    forces each file to be updated on each update");
 			System.out.println("  -n  --no-update       initial data update is skipped");
 			System.out.println("        --no-soundgasm  initial soundgasm update is skipped");
@@ -85,10 +85,10 @@ public class Main
 				System.exit(2);
 			}
 		}
-		else if ((float)interval/(60*60*1000) < 6)
+		else if ((float)interval/(60*1000) < 30)
 		{
 			System.out.println("error - update interval must be greater " +
-					"than or equal to six hours (360 mins)");
+					"than or equal to 30 minutes");
 			System.exit(1);
 		}
 		else if (heavyUpdate)
