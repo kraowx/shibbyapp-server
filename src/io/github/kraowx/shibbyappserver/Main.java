@@ -23,12 +23,13 @@ public class Main
 		boolean noUpdate = hasArg("--no-update", "-n", false, args);
 		boolean noSoundgasm = hasArg("--no-soundgasm", null, false, args);
 		boolean noPatreon = hasArg("--no-patreon", null, false, args);
+		boolean includeFileDuration = hasArg("--file-duration", "-d", false, args);
 		boolean help = hasArg("--help", null, false, args);
 		boolean version = hasArg("--version", null, false, args);
 		boolean configPatreon = hasArg("--config-patreon", null, false, args);
 		if (help)
 		{
-			System.out.println("Usage: exec [-h] [-p port] [-i interval]");
+			System.out.println("Usage: exec [-h] [-n] [-d] [-p port] [-i interval]");
 			System.out.println("Companion server for ShibbyApp that collects, " +
 					"organizes, and distributes Shibby's audio files.");
 			System.out.println("\nOptions:");
@@ -38,6 +39,7 @@ public class Main
 			System.out.println("  -n  --no-update       initial data update is skipped");
 			System.out.println("        --no-soundgasm  initial soundgasm update is skipped");
 			System.out.println("        --no-patreon    initial patreon update is skipped");
+			System.out.println("  -d  --file-duration   updates each file with its duration (very slow)");
 			System.out.println("      --help            display this help and exit");
 			System.out.println("      --version         output version information and exit");
 			System.out.println("      --config-patreon  setup Patreon integration feature");
@@ -113,7 +115,7 @@ public class Main
 		try
 		{
 			Server server = new Server(port, interval,
-					heavyUpdate, initialUpdate);
+					heavyUpdate, initialUpdate, includeFileDuration);
 		}
 		catch (IOException ioe)
 		{

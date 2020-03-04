@@ -14,19 +14,20 @@ import io.github.kraowx.shibbyappserver.tools.Version;
 
 public class Server extends NanoHTTPD
 {
-	public static final Version VERSION = new Version("2.0.1");
-	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.0.0")};
+	public static final Version VERSION = new Version("2.0.2");
+	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.0.0"), new Version("2.0.1")};
 	private final String HTML_PATH = "index.html";
 	
 	private String html;
 	private DataUpdater dataUpdater;
 	
 	public Server(int port, int interval, boolean heavyUpdate,
-			int initialUpdate) throws IOException
+			int initialUpdate, boolean fileDuration) throws IOException
 	{
 		super(port);
 		html = getHtml();
-		dataUpdater = new DataUpdater(interval, heavyUpdate, initialUpdate);
+		dataUpdater = new DataUpdater(interval, heavyUpdate,
+				initialUpdate, fileDuration);
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
 		System.out.println(FormattedOutput.get("Server started on port " + port + "."));
 	}
@@ -70,8 +71,13 @@ public class Server extends NanoHTTPD
 	private Request sessionToRequest(IHTTPSession session)
 	{
 		Map<String, String> parms = session.getParms();
-		String requestTypeParm = parms.containsKey("type") ?
-				parms.get("type") : null;
+		String uri = session.getUri();
+		String requestTypeParm = uri.equals("/") ? null : uri.substring(1);
+		if (requestTypeParm == null)
+		{
+			requestTypeParm = parms.containsKey("type") ?
+					parms.get("type") : null;
+		}
 		if (requestTypeParm != null)
 		{
 			/* Build a request object (request type + data) */

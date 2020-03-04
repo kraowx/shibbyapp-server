@@ -5,7 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -20,6 +25,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import de.odysseus.ithaka.audioinfo.AudioInfo;
+import de.odysseus.ithaka.audioinfo.m4a.M4AInfo;
+import de.odysseus.ithaka.audioinfo.mp3.MP3Info;
 import io.github.kraowx.shibbyappserver.models.MasterList;
 import io.github.kraowx.shibbyappserver.models.ShibbyFile;
 import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
@@ -33,19 +41,21 @@ public class DataUpdater
 	public static final String CONFIG_FILE_PATH = "shibbyapp-server.config";
 	
 	private int interval, initialUpdate;
-	private boolean initialized,
-		heavyUpdate, patreonEnabled;
+	private boolean initialized, heavyUpdate,
+		includeFileDuration, patreonEnabled;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags, tagsWithPatreon;
 	private JSONArray patreonFiles;
 	private MasterList masterList;
 	private Timer timer;
 	
-	public DataUpdater(int interval, boolean heavyUpdate, int initialUpdate)
+	public DataUpdater(int interval, boolean heavyUpdate,
+			int initialUpdate, boolean includeFileDuration)
 	{
 		this.interval = interval;
 		this.heavyUpdate = heavyUpdate;
 		this.initialUpdate = initialUpdate;
+		this.includeFileDuration = includeFileDuration;
 		init();
 		start();
 	}
@@ -254,6 +264,8 @@ public class DataUpdater
 			System.out.println(FormattedOutput.get("Retrieving local soundgasm master file list..."));
 		}
 		updateFiles();
+		System.out.println(FormattedOutput.get("Applying latest changes to local soundgasm master file list..."));
+		applyLocalFileChanges();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
 		if (initialUpdate == 0 || initialUpdate == 2)
@@ -327,6 +339,10 @@ public class DataUpdater
 						jss = jss.substring(jss.indexOf("m4a: \"")+6);
 						jss = jss.substring(0, jss.indexOf("\""));
 						newFile.setLink(jss);
+						if (includeFileDuration)
+						{
+							newFile.setDuration(getFileDuration(newFile));
+						}
 						if (oldFile != null && oldFile.getName().equals(newFile.getName()))
 						{
 							// If a local file with the same name already exists,
@@ -369,6 +385,89 @@ public class DataUpdater
 		{
 			files = masterList.getFiles();
 		}
+	}
+	
+	/*
+	 * Detects and applies changes made to the local soundgasm master list.
+	 * These changes might be made after the data collection algorithm is modified,
+	 * which results in small changes to file names or other file data.
+	 */
+	private void applyLocalFileChanges()
+	{
+		for (int i = 0; i < files.size(); i++)
+		{
+			ShibbyFile file = files.get(i);
+			String latestShortName = file.getShortNameFromName(file.getName());
+			List<String> latestTags = file.getTagsFromName();
+			if (!file.getShortName().equals(latestShortName) ||
+					!file.getTags().toString().equals(latestTags.toString()) ||
+					(file.getDuration() == 0 && includeFileDuration))
+			{
+				System.out.println(FormattedOutput.get("Applying local changes to file " +
+						(i+1) + "/" + files.size() + "..."));
+			}
+			// Compare local shortName to shortName based on original file name
+			if (!file.getShortName().equals(latestShortName))
+			{
+				file.setShortName(latestShortName);
+			}
+			if (!file.getTags().toString().equals(latestTags.toString()))
+			{
+				file.setTags(latestTags);
+			}
+			if (file.getDuration() == 0 && includeFileDuration)
+			{
+				file.setDuration(getFileDuration(file));
+			}
+		}
+	}
+	
+	/*
+	 * Compute the duration of a shibbyfile in either M4A or MP3 format.
+	 * Note: The 218 files from the bottom appears to take SIGNIFICANTLY
+	 * longer to compute the file duration. I expect this is because
+	 * the files were created in a different (less efficient) way.
+	 */
+	private long getFileDuration(ShibbyFile file)
+	{
+		long duration = 0;
+		URL url = null;
+		try
+		{
+			url = new URL(file.getLink());
+		}
+		catch (MalformedURLException mue)
+		{
+			System.out.println(FormattedOutput.get(
+					"ERROR: Failed to get file duration."));
+		}
+		try (InputStream input = url.openStream())
+		{
+			if (file.getLink().endsWith(".m4a"))
+			{
+				AudioInfo audioInfo = new M4AInfo(input);
+				duration = audioInfo.getDuration();
+				input.close();
+			}
+			else if (file.getLink().endsWith(".mp3"))
+			{
+				HttpURLConnection conn;
+				conn = (HttpURLConnection)url.openConnection();
+				conn.setRequestMethod("HEAD");
+	            conn.getInputStream(); 
+	            long size = BigInteger.valueOf(conn.getContentLength()).longValue();
+	            conn.getInputStream().close();
+	            AudioInfo audioInfo = new MP3Info(input, size);
+				duration = audioInfo.getDuration();
+				input.close();
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println(FormattedOutput.get(
+					"ERROR: Failed to get file duration."));
+		}
+		return duration;
 	}
 	
 	/*

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>shibbyapp-server</groupId>
   <artifactId>shibbyapp-server</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.2</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -51,5 +51,16 @@
 	  <artifactId>nanohttpd</artifactId>
 	  <version>2.2.0</version>
     </dependency>
+    <dependency>
+	  <groupId>de.odysseus.ithaka</groupId>
+	  <artifactId>ithaka-audioinfo</artifactId>
+	  <version>1.0</version>
+    </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>ithaka</id>
+      <url>http://beckchr.github.com/ithaka-maven/mvnrepo/</url>
+    </repository>
+  </repositories>
 </project>

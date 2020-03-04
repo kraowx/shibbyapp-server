@@ -15,6 +15,7 @@ public class ShibbyFile
 {
 	private String name, shortName, id,
 		link, description, type;
+	private long duration;
 	private List<String> tags;
 	private Map<String, String> extraData;
 	
@@ -36,7 +37,7 @@ public class ShibbyFile
 			String type, Map<String, String> extraData)
 	{
 		this.name = name;
-		this.shortName = getShortName(name);
+		this.shortName = getShortNameFromName(name);
 		if (id == null && name != null)
 		{
 			createIdFromName();
@@ -69,6 +70,10 @@ public class ShibbyFile
 		json.put("tags", tagsJson);
 		json.put("link", link);
 		json.put("description", description);
+		if (duration != 0)
+		{
+			json.put("duration", duration);
+		}
 		json.put("type", type);
 		JSONObject extras = new JSONObject();
 		for (String key : extraData.keySet())
@@ -90,7 +95,7 @@ public class ShibbyFile
         }
         else
         {
-        	file.shortName = file.getShortName(file.name);
+        	file.shortName = file.getShortNameFromName(file.name);
         }
         if (!json.has("id") && file.name != null)
         {
@@ -121,6 +126,10 @@ public class ShibbyFile
             file.link = json.getJSONArray("links").getString(0);
         }
         file.description = json.getString("description");
+        if (json.has("duration"))
+        {
+        	file.duration = json.getLong("duration");
+        }
         if (!json.has("type"))
         {
         	file.type = "";
@@ -211,7 +220,17 @@ public class ShibbyFile
 		this.tags = tags;
 	}
 	
-	private List<String> getTagsFromName()
+	public long getDuration()
+	{
+		return duration;
+	}
+	
+	public void setDuration(long duration)
+	{
+		this.duration = duration;
+	}
+	
+	public List<String> getTagsFromName()
 	{
 		List<String> tags = new ArrayList<String>();
 		if (name != null)
@@ -240,7 +259,7 @@ public class ShibbyFile
 		return tags;
 	}
 	
-	private String getShortName(String name)
+	public String getShortNameFromName(String name)
 	{
 		if (name == null)
 		{
@@ -266,12 +285,21 @@ public class ShibbyFile
 			{
 				in = false;
 			}
-			else if (!in && c != ' ')
+			else if (!in && c != ' ' && !hasOr(chars, i))
 			{
 				name = name.substring(i, name.length()-1);
 				break;
 			}
-			tags += c;
+			// Handle leading tags in the form "[xxx] or [xxx]"
+			if (hasOr(chars, i) && i+1 == 'r')
+			{
+				chars[i] = 'o';
+				chars[i+1] = 'r';
+			}
+			else
+			{
+				tags += c;
+			}
 		}
 		if (!tags.endsWith(" "))
 		{
@@ -286,8 +314,42 @@ public class ShibbyFile
 		if (rightIndex != -1)
 		{
 			name = name.substring(0, rightIndex);
+			if (name.length() > 0 && name.charAt(name.length()-1) == ' ')
+			{
+				name = name.substring(0, name.length()-1);
+			}
 		}
-		return tags + name;
+		return removeScriptFillTag(tags) + name;
+	}
+	
+	/*
+	 * Checks if a string contains an "or" at the index i or the index i+1.
+	 */
+	private static boolean hasOr(char[] chars, int i)
+	{
+		return (i+1 < chars.length && chars[i] == 'o' && chars[i+1] == 'r') ||
+				(i-1 > 0 && chars[i-1] == 'o' && chars[i] == 'r');
+	}
+	
+	private static String removeScriptFillTag(String tags)
+	{
+		int index = tags.toLowerCase().indexOf("script fill");
+		int left = index-1;
+		if (left > 0 && tags.charAt(left-1) == ' ')
+		{
+			left--;
+		}
+		if (index != -1)
+		{
+			int right = index;
+			while (right < tags.length() && tags.charAt(right) != ']')
+			{
+				right++;
+			}
+			String tag = tags.substring(left, ++right);
+			return tags.replace(tag, "");
+		}
+		return tags;
 	}
 	
 	private void createIdFromName()
