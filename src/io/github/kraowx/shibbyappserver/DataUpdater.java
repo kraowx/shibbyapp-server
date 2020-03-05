@@ -401,7 +401,8 @@ public class DataUpdater
 			List<String> latestTags = file.getTagsFromName();
 			if (!file.getShortName().equals(latestShortName) ||
 					!file.getTags().toString().equals(latestTags.toString()) ||
-					(file.getDuration() == 0 && includeFileDuration))
+					(file.getDuration() == 0 && includeFileDuration) ||
+					(file.getType() == null || (file.getType() != null && file.getType().isEmpty())))
 			{
 				System.out.println(FormattedOutput.get("Applying local changes to file " +
 						(i+1) + "/" + files.size() + "..."));
@@ -419,6 +420,11 @@ public class DataUpdater
 			{
 				file.setDuration(getFileDuration(file));
 			}
+			if (file.getType() == null || (file.getType() != null && file.getType().isEmpty()))
+			{
+				file.setType("soundgasm");
+			}
+			System.out.println(file.getShortName());
 		}
 	}
 	

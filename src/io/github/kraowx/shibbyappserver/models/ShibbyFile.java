@@ -261,9 +261,14 @@ public class ShibbyFile
 	
 	public String getShortNameFromName(String name)
 	{
+		Map<String, String> nameExceptions = getNameExceptions();
 		if (name == null)
 		{
 			return null;
+		}
+		else if (nameExceptions.containsKey(name))
+		{
+			return nameExceptions.get(name);
 		}
 		String tags = "";
 		char[] chars = name.toCharArray();
@@ -272,6 +277,7 @@ public class ShibbyFile
 		for (int i = 0; i < chars.length; i++)
 		{
 			c = chars[i];
+			// Check for beginning of tag
 			if (c == '[')
 			{
 				if (in && i != 0)
@@ -281,10 +287,12 @@ public class ShibbyFile
 				}
 				in = true;
 			}
+			// Check for end of tag
 			else if (c == ']' || c == ')')
 			{
 				in = false;
 			}
+			// Check for end of all tags
 			else if (!in && c != ' ' && !hasOr(chars, i))
 			{
 				name = name.substring(i, name.length()-1);
@@ -301,6 +309,7 @@ public class ShibbyFile
 				tags += c;
 			}
 		}
+		// Separate leading tags and name
 		if (!tags.endsWith(" "))
 		{
 			tags += " ";
@@ -319,7 +328,10 @@ public class ShibbyFile
 				name = name.substring(0, name.length()-1);
 			}
 		}
-		return removeScriptFillTag(tags) + name;
+		// Tag cleanup for consistency
+		tags = removeTagAfterLeading(tags);
+		tags = capitalizeLeadingTag(tags);
+		return tags + name;
 	}
 	
 	/*
@@ -331,9 +343,22 @@ public class ShibbyFile
 				(i-1 > 0 && chars[i-1] == 'o' && chars[i] == 'r');
 	}
 	
-	private static String removeScriptFillTag(String tags)
+	/*
+	 * Removes certain unwanted tags that immediately follow the leading tag.
+	 */
+	private static String removeTagAfterLeading(String tags)
 	{
-		int index = tags.toLowerCase().indexOf("script fill");
+		final String[] tagsToRemove = {"script fill", "script offer",
+				"secret santa", "deepener", "tomboy"};
+		int index = -1;
+		for (int i = 0; i < tagsToRemove.length && index == -1; i++)
+		{
+			index = tags.toLowerCase().indexOf(tagsToRemove[i]);
+			if (index != -1)
+			{
+				break;
+			}
+		}
 		int left = index-1;
 		if (left > 0 && tags.charAt(left-1) == ' ')
 		{
@@ -350,6 +375,41 @@ public class ShibbyFile
 			return tags.replace(tag, "");
 		}
 		return tags;
+	}
+	
+	/*
+	 * Capitalizes up to the first 10 characters of the leading tag.
+	 * If leading tag is greater than 10 characters then no
+	 * characters are capitalized (assume it contains information
+	 * that shouldn't be capitalized).
+	 */
+	private static String capitalizeLeadingTag(String tags)
+	{
+		int right = 0;
+		while (right < tags.length() && tags.charAt(right) != ']')
+		{
+			right++;
+		}
+		String oldTag = tags.substring(0, right);
+		return right < 9 ? tags.replace(oldTag, oldTag.toUpperCase()) : tags;
+	}
+	
+	/*
+	 * Unfortunately, some names can't be easily parsed by a generalization.
+	 * Older such names are mapped through this function, as they are
+	 * highly unlikely to be modified. Only names that would drastically
+	 * complicate the parsing algorithm are mapped here.
+	 */
+	private static Map<String, String> getNameExceptions()
+	{
+		Map<String, String> exceptions = new HashMap<String, String>();
+		exceptions.put("[F4M Wake up JOI [Alarm Clock][5 minutes][Whispers][JOE][Script Fill]",
+				"[F4M] Wake up JOI");
+		exceptions.put("[F4M][ The Woman Who Knows You Better Than Anyone][light Fdom]" +
+				"[voyeur][stalking][fantasizing][masturbation][dirty talk][possession]" +
+				"[whispers] Script by /u/Belle_in_the_woods", "[F4M] The Woman Who Knows " +
+				"You Better Than Anyone");
+		return exceptions;
 	}
 	
 	private void createIdFromName()
