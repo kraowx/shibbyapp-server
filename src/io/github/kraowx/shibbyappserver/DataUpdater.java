@@ -424,7 +424,6 @@ public class DataUpdater
 			{
 				file.setType("soundgasm");
 			}
-			System.out.println(file.getShortName());
 		}
 	}
 	
