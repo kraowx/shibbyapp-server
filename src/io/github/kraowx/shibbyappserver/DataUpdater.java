@@ -25,6 +25,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.github.kevinsawicki.http.HttpRequest;
+import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+
 import de.odysseus.ithaka.audioinfo.AudioInfo;
 import de.odysseus.ithaka.audioinfo.m4a.M4AInfo;
 import de.odysseus.ithaka.audioinfo.mp3.MP3Info;
@@ -39,10 +42,13 @@ public class DataUpdater
 	public static final String PATREON_SCRIPT_PATH = "patreonScript.py";
 	public static final String PATREON_DATA_PATH = "patreonData.json";
 	public static final String CONFIG_FILE_PATH = "shibbyapp-server.config";
+	public static final String ONLINE_STORAGE_PATH = "remoteStorage";
 	
 	private int interval, initialUpdate;
 	private boolean initialized, heavyUpdate,
-		includeFileDuration, patreonEnabled;
+		includeFileDuration, patreonEnabled,
+		remoteStorageEnabled;
+	private String remoteStorageUrl, remoteStorageKey;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags, tagsWithPatreon;
 	private JSONArray patreonFiles;
@@ -76,6 +82,19 @@ public class DataUpdater
 		else
 		{
 			System.out.println(FormattedOutput.get("Patreon updates DISABLED"));
+		}
+		String[] remoteStorage = readRemoteStorageFile();
+		remoteStorageEnabled = remoteStorage != null;
+		if (remoteStorageEnabled)
+		{
+			remoteStorageUrl = remoteStorage[0];
+			remoteStorageKey = remoteStorage[1];
+			System.out.println(FormattedOutput.get(
+					"Remote storage enabled at URL '" + remoteStorageUrl + "'"));
+		}
+		else
+		{
+			System.out.println(FormattedOutput.get("Remote storage DISABLED"));
 		}
 	}
 	
@@ -273,6 +292,12 @@ public class DataUpdater
 			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
 					MasterList.LOCAL_LIST_PATH + "'..."));
 			masterList.writeLocalList(files);
+			if (remoteStorageEnabled)
+			{
+				System.out.println(FormattedOutput.get(
+						"Writing soundgasm master file list to remote storage..."));
+				masterList.writeRemoteList(files, remoteStorageUrl, remoteStorageKey);
+			}
 		}
 		if (!initialized)
 		{
@@ -298,7 +323,8 @@ public class DataUpdater
 		// Only update if the local master list and the
 		// latest master list are not identical
 		if ((initialUpdate == 0 || initialUpdate == 2) &&
-				masterList.update(heavyUpdate))
+				masterList.update(heavyUpdate, remoteStorageEnabled,
+						remoteStorageUrl, remoteStorageKey))
 		{
 			List<ShibbyFile> newFiles = masterList.getFiles();
 			// A buffer is used so that the indices are not changed
@@ -430,7 +456,7 @@ public class DataUpdater
 	/*
 	 * Compute the duration of a shibbyfile in either M4A or MP3 format.
 	 * Note: The 218 files from the bottom appears to take SIGNIFICANTLY
-	 * longer to compute the file duration. I expect this is because
+	 * longer to compute the file duration. I suspect this is because
 	 * the files were created in a different (less efficient) way.
 	 */
 	private long getFileDuration(ShibbyFile file)
@@ -869,5 +895,28 @@ public class DataUpdater
 			ioe.printStackTrace();
 		}
 		return isAccountVerified(email, password) == 1;
+	}
+	
+	private String[] readRemoteStorageFile()
+	{
+		String[] data = new String[2];
+		File configFile = new File(ONLINE_STORAGE_PATH);
+		BufferedReader reader;
+		try
+		{
+			reader = new BufferedReader(new FileReader(configFile));
+			data[0] = reader.readLine();
+			data[1] = reader.readLine();
+			reader.close();
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+		}
+		if (data[0] == null || data[1] == null)
+		{
+			return null;
+		}
+		return data;
 	}
 }

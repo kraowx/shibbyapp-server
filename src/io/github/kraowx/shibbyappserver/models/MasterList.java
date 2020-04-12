@@ -10,10 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.github.kevinsawicki.http.HttpRequest;
+import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 public class MasterList
 {
@@ -37,12 +41,13 @@ public class MasterList
 	 * Updates the master list only if an update is required.
 	 * Can be overridden to force an update.
 	 */
-	public boolean update(boolean force)
+	public boolean update(boolean force, boolean remoteEnabled,
+			String url, String key)
 	{
 		try
 		{
 			Document doc = Jsoup.connect(MASTER_LIST_URL).get();
-			if (force || updateNeeded(doc))
+			if (force || updateNeeded(doc, remoteEnabled, url, key))
 			{
 				this.doc = doc;
 				files = parseDocument(doc);
@@ -60,12 +65,21 @@ public class MasterList
 	 * Check if an update is actually required by comparing
 	 * the local master list with the latest version.
 	 */
-	private boolean updateNeeded(Document doc)
+	private boolean updateNeeded(Document doc, boolean remoteEnabled,
+			String url, String key)
 	{
 		List<ShibbyFile> filesNew = new ArrayList<ShibbyFile>();
 		List<ShibbyFile> docFiles = parseDocument(doc);
 		// Load cached files
-		if (this.doc == null)
+		if (this.doc == null && remoteEnabled)
+		{
+			filesNew = files = readRemoteList(url, key);
+			if (files == null)
+			{
+				filesNew = files = readLocalList();
+			}
+		}
+		else if (this.doc == null)
 		{
 			filesNew = files = readLocalList();
 		}
@@ -179,5 +193,54 @@ public class MasterList
 			}
 		}
 		return list;
+	}
+	
+	public void writeRemoteList(List<ShibbyFile> list, String url, String key)
+	{
+		JSONArray arr = new JSONArray();
+		for (ShibbyFile file : list)
+		{
+			arr.put(file.toJSON());
+		}
+		try
+		{
+			HttpRequest req = HttpRequest.put(url);
+			req.contentType("application/json");
+			req.userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36");
+			req.header("Api-Key", key);
+			req.send(arr.toString());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public List<ShibbyFile> readRemoteList(String url, String key)
+	{
+		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
+		try
+		{
+			HttpRequest req = HttpRequest.get(url);
+			req.contentType("application/json");
+			req.userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36");
+			req.header("Api-Key", key);
+			if (req.ok())
+			{
+				JSONObject data = new JSONObject(req.body());
+				JSONArray arr = data.getJSONArray("data");
+				for (int i = 0; i < data.length(); i++)
+				{
+					files.add(ShibbyFile.fromJSON(
+							arr.getJSONObject(i).toString()));
+				}
+				return files;
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
