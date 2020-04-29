@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.github.kevinsawicki.http.HttpRequest;
+
 import de.odysseus.ithaka.audioinfo.AudioInfo;
 import de.odysseus.ithaka.audioinfo.m4a.M4AInfo;
 import de.odysseus.ithaka.audioinfo.mp3.MP3Info;
@@ -35,6 +38,8 @@ import io.github.kraowx.shibbyappserver.models.HotspotArray;
 import io.github.kraowx.shibbyappserver.models.MasterList;
 import io.github.kraowx.shibbyappserver.models.ShibbyFile;
 import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
+import io.github.kraowx.shibbyappserver.models.ShibbyTag;
+import io.github.kraowx.shibbyappserver.models.ShibbyTagFile;
 import io.github.kraowx.shibbyappserver.tools.AudioAnalysis;
 import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
@@ -55,7 +60,7 @@ public class DataUpdater
 		patreonEnabled, remoteStorageEnabled;
 	private String remoteStorageUrl, remoteStorageKey;
 	private List<ShibbyFile> files;
-	private List<ShibbyFileArray> tags, tagsWithPatreon;
+	private List<ShibbyTag> tags, tagsWithPatreon;
 	private List<HotspotArray> hotspots;
 	private JSONArray patreonFiles;
 	private MasterList masterList;
@@ -77,8 +82,8 @@ public class DataUpdater
 	private void init()
 	{
 		files = new ArrayList<ShibbyFile>();
-		tags = new ArrayList<ShibbyFileArray>();
-		tagsWithPatreon = new ArrayList<ShibbyFileArray>();
+		tags = new ArrayList<ShibbyTag>();
+		tagsWithPatreon = new ArrayList<ShibbyTag>();
 		hotspots = new ArrayList<HotspotArray>();
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
@@ -176,12 +181,12 @@ public class DataUpdater
 	public JSONArray getTagsJSON()
 	{
 		JSONArray arr = new JSONArray();
-		for (ShibbyFileArray tag : tags)
+		for (ShibbyTag tag : tags)
 		{
 			JSONObject objTag = new JSONObject();
 			objTag.put("name", tag.getName());
 			JSONArray arrTag = new JSONArray();
-			for (ShibbyFile file : tag.getFiles())
+			for (ShibbyTagFile file : tag.getFiles())
 			{
 				arrTag.put(file.getId());
 			}
@@ -197,12 +202,12 @@ public class DataUpdater
 	public JSONArray getTagsWithPatreonJSON()
 	{
 		JSONArray arr = new JSONArray();
-		for (ShibbyFileArray tag : tagsWithPatreon)
+		for (ShibbyTag tag : tagsWithPatreon)
 		{
 			JSONObject objTag = new JSONObject();
 			objTag.put("name", tag.getName());
 			JSONArray arrTag = new JSONArray();
-			for (ShibbyFile file : tag.getFiles())
+			for (ShibbyTagFile file : tag.getFiles())
 			{
 				arrTag.put(file.getId());
 			}
@@ -309,32 +314,32 @@ public class DataUpdater
 		applyLocalFileChanges();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
-//		if (initialUpdate == 0 || initialUpdate == 2)
-//		{
-//			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
-//					MasterList.LOCAL_LIST_PATH + "'..."));
-//			masterList.writeLocalList(files);
-//			if (remoteStorageEnabled)
-//			{
-//				System.out.println(FormattedOutput.get(
-//						"Writing soundgasm master file list to remote storage..."));
-//				masterList.writeRemoteList(files, remoteStorageUrl, remoteStorageKey);
-//			}
-//			System.out.println(FormattedOutput.get("Writing hotspots to local list..."));
-//			writeHotspotsToDisk();
-//		}
-//		if (!initialized)
-//		{
-//			initialized = true;
-//		}
-//		if (initialUpdate > 0)
-//		{
-//			initialUpdate = 0;
-//		}
-//		long endTime = Calendar.getInstance().getTime().getTime();
-//		float duration = (float)(endTime - startTime)/1000;
-//		System.out.println(FormattedOutput.get("Data update complete in " +
-//				duration + " seconds."));
+		if (initialUpdate == 0 || initialUpdate == 2)
+		{
+			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
+					MasterList.LOCAL_LIST_PATH + "'..."));
+			masterList.writeLocalList(files);
+			if (remoteStorageEnabled)
+			{
+				System.out.println(FormattedOutput.get(
+						"Writing soundgasm master file list to remote storage..."));
+				masterList.writeRemoteList(files, remoteStorageUrl, remoteStorageKey);
+			}
+			System.out.println(FormattedOutput.get("Writing hotspots to local list..."));
+			writeHotspotsToDisk();
+		}
+		if (!initialized)
+		{
+			initialized = true;
+		}
+		if (initialUpdate > 0)
+		{
+			initialUpdate = 0;
+		}
+		long endTime = Calendar.getInstance().getTime().getTime();
+		float duration = (float)(endTime - startTime)/1000;
+		System.out.println(FormattedOutput.get("Data update complete in " +
+				duration + " seconds."));
 	}
 	
 	/*
@@ -708,7 +713,7 @@ public class DataUpdater
 	 * Updates a local list of tags to include any new files.
 	 */
 	private void updateListTags(List<ShibbyFile> list,
-			List<ShibbyFileArray> tagsList)
+			List<ShibbyTag> tagsList)
 	{
 		for (ShibbyFile file : list)
 		{
@@ -737,8 +742,7 @@ public class DataUpdater
 				else
 				{
 					// Tag does not yet exist in the record, so add it
-					tagsList.add(new ShibbyFileArray(tag,
-							new ShibbyFile[]{file}, null));
+					tagsList.add(new ShibbyTag(tag, file));
 				}
 			}
 		}
@@ -750,11 +754,11 @@ public class DataUpdater
 	 *   files associated with them
 	 * - (more filtering techniques will be added)
 	 */
-	private void filterTags(List<ShibbyFileArray> tagsList)
+	private void filterTags(List<ShibbyTag> tagsList)
 	{
-		List<ShibbyFileArray> temp =
-				(List<ShibbyFileArray>)((ArrayList)tagsList).clone();
-		for (ShibbyFileArray tag : temp)
+		List<ShibbyTag> temp =
+				(List<ShibbyTag>)((ArrayList)tagsList).clone();
+		for (ShibbyTag tag : temp)
 		{
 			if (tag.getFileCount() == 1)
 			{
@@ -820,7 +824,7 @@ public class DataUpdater
 	 * Returns the index of a tag in a list, or -1 if the
 	 * tag is not in the list.
 	 */
-	private int indexOfTag(String tag, List<ShibbyFileArray> tagsList)
+	private int indexOfTag(String tag, List<ShibbyTag> tagsList)
 	{
 		for (int i = 0; i < tagsList.size(); i++)
 		{
