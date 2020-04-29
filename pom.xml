@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>shibbyapp-server</groupId>
   <artifactId>shibbyapp-server</artifactId>
-  <version>2.0.4</version>
+  <version>2.1.0</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
