@@ -61,11 +61,21 @@
       <artifactId>http-request</artifactId>
       <version>6.0</version>
     </dependency>
+    <dependency>
+      <groupId>net.sourceforge.jaad</groupId>
+      <artifactId>jaad</artifactId>
+      <version>0.8.4</version>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>
       <id>ithaka</id>
       <url>http://beckchr.github.com/ithaka-maven/mvnrepo/</url>
+    </repository>
+    <repository>
+      <id>project.local</id>
+      <name>project</name>
+      <url>file:${project.basedir}/repo</url>
     </repository>
   </repositories>
 </project>
