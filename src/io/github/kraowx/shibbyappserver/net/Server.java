@@ -14,7 +14,7 @@ import io.github.kraowx.shibbyappserver.tools.Version;
 
 public class Server extends NanoHTTPD
 {
-	public static final Version VERSION = new Version("2.0.3");
+	public static final Version VERSION = new Version("2.1.0");
 	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.0.0"),
 			new Version("2.0.1"), new Version("2.0.2"), new Version("2.1.0")};
 	private final String HTML_PATH = "index.html";
@@ -22,13 +22,13 @@ public class Server extends NanoHTTPD
 	private String html;
 	private DataUpdater dataUpdater;
 	
-	public Server(int port, int interval, boolean heavyUpdate,
-			int initialUpdate, boolean fileDuration) throws IOException
+	public Server(int port, int interval, boolean forceUpdate,
+			int initialUpdate, boolean fileDuration, boolean hotspots) throws IOException
 	{
 		super(port);
 		html = getHtml();
-		dataUpdater = new DataUpdater(interval, heavyUpdate,
-				initialUpdate, fileDuration);
+		dataUpdater = new DataUpdater(interval, forceUpdate,
+				initialUpdate, fileDuration, hotspots);
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
 		System.out.println(FormattedOutput.get("Server started on port " + port + "."));
 	}

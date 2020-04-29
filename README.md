@@ -15,6 +15,9 @@ This is an *optional* feature that enables the server to gather the latest files
 ### Patreon Setup
 To setup Patreon integration, you will need [Python3](https://www.python.org/downloads/) installed on your computer. You will also need to download the [Patreon script](https://github.com/kraowx/shibbyapp-server/releases/latest/download/patreonScript.py) which handles communication with Patreon. Move <code>patreonScript.py</code> to the same location as <code>shibbyapp-server.jar</code>. Next, you will need to install a few dependencies in order for the script to work. Open a terminal and enter the command <code>pip3 install requests cfscrape</code>. Press enter and wait for the installation to finish. Finally, you need to add your Patreon account to the server configuration. Simply run the server with the --config-patreon option: <code>java -jar shibbyapp-server.jar --config-patreon</code> and you will be prompted to enter the email and password for your Patreon account. This should create the file <code>shibbyapp-server.config</code> in the same location as the server executable containing your Patreon account info. The next time you run the server normally, the server will start gathering data from your Patreon feed.
 
+### Hotspots (Experimental)
+Hotspots are locations defined in an audio file that attempt to produce a more intense reaction to certain parts of the file. Currently, hotspots are somwhat arbitrarily defined to react to the amplitude/loudness of the file. This is not a perfect solution by any means, so I will probably be tweaking it over time. A somewhat significant limitation to this is the amount of time that it takes to compute the hotspots for each file. Each file must be essentially downloaded and analyzed separately, which can take up to multiple days depending on hardware and internet speed.
+
 ## Series
 Since it is difficult to detect which files are part of which series, they will have to be declared manually. I have already created a file that contains a few declarations. You can download that file [here](https://raw.githubusercontent.com/kraowx/shibbyapp-server/master/seriesList.json) and save it to a file named "seriesList.json". In order for the server to detect this file, it must be placed in the same directory/folder as the server executable.
 
@@ -25,7 +28,7 @@ The series file uses the JSON format, where each series is a JSON object declare
 Adding a series is actually quite straightforward, and you can really just copy the format/pattern used in the <code>seriesList.json</code> file to create a new series. You will need to construct a JSON object for each file you want to add to the series by following the structure described above. Once you have the JSON objects for each file, you can construct a JSON object for the series and simply add it to the top-level JSON array.
 
 ## Interface Structure
-The server interfaces with the client over HTTP. The base structure of a request is <code>http://&lt;IP&gt;:&lt;PORT&gt;?version=&lt;VERSION&gt;&type=&lt;TYPE&gt;</code>. Where &lt;VERSION&gt; is the version of the client, and &lt;TYPE&gt; is the type of request being made. The available types are described below.
+The server interfaces with the client over HTTP. The base structure of a request is <code>http://&lt;IP&gt;:&lt;PORT&gt;?version=&lt;VERSION&gt;&type=&lt;TYPE&gt;</code>. Where &lt;VERSION&gt; is the version of the client, and &lt;TYPE&gt; is the type of request being made. The available types are described below. You can also express a request as <code>http://&lt;IP&gt;:&lt;PORT&gt;/&lt;TYPE&gt;?version=&lt;VERSION&gt;</code>.
 
 ### Version
 Returns the current version of the server in the format <code>{"type": "VERSION", "data": &lt;VERSION&gt;}</code>. No <code>version</code> parameter required.
@@ -47,3 +50,6 @@ Returns all series in the format <code>{"type": "SERIES", "data": [{"name": &lt;
 
 ### Patreon\_Files
 On success, returns all Patreon files in the format <code>{"type": "PATREON\_FILES", "data": [&lt;FILE&gt;, &lt;FILE&gt;, ...]}</code>. Where &lt;FILE&gt; is a file (json object) in the format specified above. May also return a number of other error responses with no associated data. These errors include: VERIFY\_PATREON\_ACCOUNT (Patreon email confirmation is required on the device), TOO\_MANY\_REQUESTS (Patreon is throttling requests on the account for 10 mins), and BAD\_ACCOUNT (invalid Patreon account).
+
+### Hotspots
+Returns the "hotspots" of all supported files in the form <code>{"type": HOTSPOTS, "data": [["id": &lt;FILE\_ID&gt;, "startTime": &lt;START\_TIME&gt;, "endTime": &lt;END\_TIME&gt;], ...]}</code>. Where &lt;FILE\_ID&gt; is the ID (SHA256 hash) of the file associated with the hotspot, &lt;START\_TIME&gt; is the starting time of the hotspot in milliseconds, and &lt;END\_TIME&gt; is the ending time of the hotspot in milliseconds. Also note that hotspots are locations within a file that are somewhat arbitrarily defined to attempt to produce a more intense reaction to Shibby's voice.

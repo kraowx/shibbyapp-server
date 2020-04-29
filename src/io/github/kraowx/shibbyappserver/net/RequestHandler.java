@@ -35,6 +35,9 @@ public class RequestHandler
 						getDataObject(dataUpdater.getSeriesJSON()));
 			case PATREON_FILES:
 				return getPatreonFilesResponse(request, dataUpdater);
+			case HOTSPOTS:
+				return new Response(ResponseType.HOTSPOTS,
+						getDataObject(dataUpdater.getHotspotsJSON()));
 		}
 		return new Response(ResponseType.INVALID_REQUEST, new JSONObject());
 	}

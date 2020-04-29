@@ -19,27 +19,29 @@ public class Main
 	{
 		int port = getIntArg("--port", "-p", DEFAULT_PORT, args);
 		int interval = getIntArg("--interval", "-i", DEFAULT_INTERVAL, args)*60*1000;
-		boolean heavyUpdate = hasArg("--heavy-update", "-h", false, args);
+		boolean forceUpdate = hasArg("--force-update", "-f", false, args);
 		boolean noUpdate = hasArg("--no-update", "-n", false, args);
 		boolean noSoundgasm = hasArg("--no-soundgasm", null, false, args);
 		boolean noPatreon = hasArg("--no-patreon", null, false, args);
 		boolean includeFileDuration = hasArg("--file-duration", "-d", false, args);
+		boolean includeHotspots = hasArg("--hotspots", "-v", false, args);
 		boolean help = hasArg("--help", null, false, args);
 		boolean version = hasArg("--version", null, false, args);
 		boolean configPatreon = hasArg("--config-patreon", null, false, args);
 		if (help)
 		{
-			System.out.println("Usage: exec [-h] [-n] [-d] [-p port] [-i interval]");
+			System.out.println("Usage: shibbyapp-server [-f] [-n] [-d] [-h] [-p port] [-i interval]");
 			System.out.println("Companion server for ShibbyApp that collects, " +
 					"organizes, and distributes Shibby's audio files.");
 			System.out.println("\nOptions:");
 			System.out.println("  -p, --port            specifies the port for the server to run on");
 			System.out.println("  -i, --interval        specifies the interval to update on in minutes");
-			System.out.println("  -h, --heavy-update    forces each file to be updated on each update");
+			System.out.println("  -f, --force-update    forces each file to be updated on each update");
 			System.out.println("  -n  --no-update       initial data update is skipped");
 			System.out.println("        --no-soundgasm  initial soundgasm update is skipped");
 			System.out.println("        --no-patreon    initial patreon update is skipped");
 			System.out.println("  -d  --file-duration   updates each file with its duration (very slow)");
+			System.out.println("  -h  --hotspots        computes vibration data for each file (very slow + experimental)");
 			System.out.println("      --help            display this help and exit");
 			System.out.println("      --version         output version information and exit");
 			System.out.println("      --config-patreon  setup Patreon integration feature");
@@ -93,9 +95,9 @@ public class Main
 					"than or equal to 30 minutes");
 			System.exit(1);
 		}
-		else if (heavyUpdate)
+		else if (forceUpdate)
 		{
-			System.out.println("WARNING: You have enabled heavy update. " +
+			System.out.println("WARNING: You have enabled force update. " +
 					"This will not only cause the server to take longer to update, " +
 					"but it will also put more stress on the soundgasm servers");
 		}
@@ -115,7 +117,8 @@ public class Main
 		try
 		{
 			Server server = new Server(port, interval,
-					heavyUpdate, initialUpdate, includeFileDuration);
+					forceUpdate, initialUpdate,
+					includeFileDuration, includeHotspots);
 		}
 		catch (IOException ioe)
 		{

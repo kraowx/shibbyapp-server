@@ -1,9 +1,11 @@
 package io.github.kraowx.shibbyappserver;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,15 +27,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
-
 import de.odysseus.ithaka.audioinfo.AudioInfo;
 import de.odysseus.ithaka.audioinfo.m4a.M4AInfo;
 import de.odysseus.ithaka.audioinfo.mp3.MP3Info;
+import io.github.kraowx.shibbyappserver.models.Hotspot;
+import io.github.kraowx.shibbyappserver.models.HotspotArray;
 import io.github.kraowx.shibbyappserver.models.MasterList;
 import io.github.kraowx.shibbyappserver.models.ShibbyFile;
 import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
+import io.github.kraowx.shibbyappserver.tools.AudioAnalysis;
 import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
 
@@ -43,25 +45,31 @@ public class DataUpdater
 	public static final String PATREON_DATA_PATH = "patreonData.json";
 	public static final String CONFIG_FILE_PATH = "shibbyapp-server.config";
 	public static final String ONLINE_STORAGE_PATH = "remoteStorage";
+	public static final String HOTSPOTS_LOCAL_PATH = "hotspots.json";
+	
+	private final int HOTSPOTS_VERSION = 0;
 	
 	private int interval, initialUpdate;
-	private boolean initialized, heavyUpdate,
-		includeFileDuration, patreonEnabled,
-		remoteStorageEnabled;
+	private boolean initialized, forceUpdate,
+		includeFileDuration, includeHotspots,
+		patreonEnabled, remoteStorageEnabled;
 	private String remoteStorageUrl, remoteStorageKey;
 	private List<ShibbyFile> files;
 	private List<ShibbyFileArray> tags, tagsWithPatreon;
+	private List<HotspotArray> hotspots;
 	private JSONArray patreonFiles;
 	private MasterList masterList;
 	private Timer timer;
 	
-	public DataUpdater(int interval, boolean heavyUpdate,
-			int initialUpdate, boolean includeFileDuration)
+	public DataUpdater(int interval, boolean forceUpdate,
+			int initialUpdate, boolean includeFileDuration,
+			boolean includeHotspots)
 	{
 		this.interval = interval;
-		this.heavyUpdate = heavyUpdate;
+		this.forceUpdate = forceUpdate;
 		this.initialUpdate = initialUpdate;
 		this.includeFileDuration = includeFileDuration;
+		this.includeHotspots = includeHotspots;
 		init();
 		start();
 	}
@@ -71,6 +79,7 @@ public class DataUpdater
 		files = new ArrayList<ShibbyFile>();
 		tags = new ArrayList<ShibbyFileArray>();
 		tagsWithPatreon = new ArrayList<ShibbyFileArray>();
+		hotspots = new ArrayList<HotspotArray>();
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
 		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
@@ -242,6 +251,19 @@ public class DataUpdater
 	}
 	
 	/*
+	 * Returns all file hotspot data from memory.
+	 */
+	public JSONArray getHotspotsJSON()
+	{
+		JSONArray arrs = new JSONArray();
+		for (int i = 0; i < hotspots.size(); i++)
+		{
+			arrs.put(new JSONObject(hotspots.get(i).toJSON()));
+		}
+		return arrs;
+	}
+	
+	/*
 	 * Returns Patreon file data in JSON format.
 	 */
 	public JSONArray getPatreonJSON()
@@ -287,30 +309,32 @@ public class DataUpdater
 		applyLocalFileChanges();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
-		if (initialUpdate == 0 || initialUpdate == 2)
-		{
-			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
-					MasterList.LOCAL_LIST_PATH + "'..."));
-			masterList.writeLocalList(files);
-			if (remoteStorageEnabled)
-			{
-				System.out.println(FormattedOutput.get(
-						"Writing soundgasm master file list to remote storage..."));
-				masterList.writeRemoteList(files, remoteStorageUrl, remoteStorageKey);
-			}
-		}
-		if (!initialized)
-		{
-			initialized = true;
-		}
-		if (initialUpdate > 0)
-		{
-			initialUpdate = 0;
-		}
-		long endTime = Calendar.getInstance().getTime().getTime();
-		float duration = (float)(endTime - startTime)/1000;
-		System.out.println(FormattedOutput.get("Data update complete in " +
-				duration + " seconds."));
+//		if (initialUpdate == 0 || initialUpdate == 2)
+//		{
+//			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
+//					MasterList.LOCAL_LIST_PATH + "'..."));
+//			masterList.writeLocalList(files);
+//			if (remoteStorageEnabled)
+//			{
+//				System.out.println(FormattedOutput.get(
+//						"Writing soundgasm master file list to remote storage..."));
+//				masterList.writeRemoteList(files, remoteStorageUrl, remoteStorageKey);
+//			}
+//			System.out.println(FormattedOutput.get("Writing hotspots to local list..."));
+//			writeHotspotsToDisk();
+//		}
+//		if (!initialized)
+//		{
+//			initialized = true;
+//		}
+//		if (initialUpdate > 0)
+//		{
+//			initialUpdate = 0;
+//		}
+//		long endTime = Calendar.getInstance().getTime().getTime();
+//		float duration = (float)(endTime - startTime)/1000;
+//		System.out.println(FormattedOutput.get("Data update complete in " +
+//				duration + " seconds."));
 	}
 	
 	/*
@@ -323,7 +347,7 @@ public class DataUpdater
 		// Only update if the local master list and the
 		// latest master list are not identical
 		if ((initialUpdate == 0 || initialUpdate == 2) &&
-				masterList.update(heavyUpdate, remoteStorageEnabled,
+				masterList.update(forceUpdate, remoteStorageEnabled,
 						remoteStorageUrl, remoteStorageKey))
 		{
 			List<ShibbyFile> newFiles = masterList.getFiles();
@@ -346,7 +370,7 @@ public class DataUpdater
 					oldFile = files.get(j);
 				}
 				ShibbyFile newFile = newFiles.get(i);
-				if (oldFile == null || heavyUpdate ||
+				if (oldFile == null || forceUpdate ||
 						!filesMostlyEqual(oldFile, newFile))
 				{
 					try
@@ -425,10 +449,12 @@ public class DataUpdater
 			ShibbyFile file = files.get(i);
 			String latestShortName = file.getShortNameFromName(file.getName());
 			List<String> latestTags = file.getTagsFromName();
+			HotspotArray fileHotspots = getFileHotspots(file);
 			if (!file.getShortName().equals(latestShortName) ||
 					!file.getTags().toString().equals(latestTags.toString()) ||
 					(file.getDuration() == 0 && includeFileDuration) ||
-					(file.getType() == null || (file.getType() != null && file.getType().isEmpty())))
+					(file.getType() == null || (file.getType() != null &&
+					file.getType().isEmpty())) || fileNeedsHotspotsUpdate(file, fileHotspots))
 			{
 				System.out.println(FormattedOutput.get("Applying local changes to file " +
 						(i+1) + "/" + files.size() + "..."));
@@ -444,11 +470,17 @@ public class DataUpdater
 			}
 			if (file.getDuration() == 0 && includeFileDuration)
 			{
+				System.out.println(FormattedOutput.get("Calculating file duration..."));
 				file.setDuration(getFileDuration(file));
 			}
 			if (file.getType() == null || (file.getType() != null && file.getType().isEmpty()))
 			{
 				file.setType("soundgasm");
+			}
+			if (fileNeedsHotspotsUpdate(file, fileHotspots))
+			{
+				System.out.println(FormattedOutput.get("Calculating file hotspots..."));
+				updateFileHotspots(file, fileHotspots);
 			}
 		}
 	}
@@ -456,7 +488,7 @@ public class DataUpdater
 	/*
 	 * Compute the duration of a shibbyfile in either M4A or MP3 format.
 	 * Note: The 218 files from the bottom appears to take SIGNIFICANTLY
-	 * longer to compute the file duration. I suspect this is because
+	 * longer to compute the file duration. I guess this is because
 	 * the files were created in a different (less efficient) way.
 	 */
 	private long getFileDuration(ShibbyFile file)
@@ -617,6 +649,59 @@ public class DataUpdater
 		filterTags(tags);
 		System.out.println(FormattedOutput.get("Sorting tags..."));
 		Collections.sort(tags, new SortByFileCount());
+	}
+	
+	private void updateFileHotspots(ShibbyFile file,
+			HotspotArray previousHotspots)
+	{
+		/*
+		 * Verified files under threshold=40 and group=2 so far:
+		 * - weeeeeeeeee
+		 * - What Whispers Can Do
+		 * - oh is it now
+		 * - We Have To Keep Quiet
+		 * - Deeper into pleasure
+		 * - Ear Licking Experiment with My New 3dio
+		 * - fuck this i want porn
+		 * - Drunk Dorm Rescue (note: 2x playback speed?)
+		 * 
+		 * Files tested that seem to require random access so far
+		 * (can't open stream through URL):
+		 * - Yes Domina Training loop
+		 * - I submit Only to Shibby
+		 */
+		if (previousHotspots != null)
+		{
+			for (HotspotArray hotspotArray : hotspots)
+			{
+				if (hotspotArray.equals(previousHotspots))
+				{
+					hotspots.remove(previousHotspots);
+				}
+			}
+		}
+		hotspots.add(new HotspotArray(file.getId(),
+				AudioAnalysis.getM4AHotspots(file),
+				HOTSPOTS_VERSION));
+	}
+	
+	private boolean fileNeedsHotspotsUpdate(ShibbyFile file,
+			HotspotArray fileHotspots)
+	{
+		return includeHotspots && (fileHotspots == null || (fileHotspots != null &&
+				fileHotspots.getVersion() != HOTSPOTS_VERSION));
+	}
+	
+	private HotspotArray getFileHotspots(ShibbyFile file)
+	{
+		for (HotspotArray hotspotArray : hotspots)
+		{
+			if (hotspotArray.getFileId().equals(file.getId()))
+			{
+				return hotspotArray;
+			}
+		}
+		return null;
 	}
 	
 	/*
@@ -918,5 +1003,26 @@ public class DataUpdater
 			return null;
 		}
 		return data;
+	}
+	
+	private void writeHotspotsToDisk()
+	{
+		JSONArray arr = getHotspotsJSON();
+		File file = new File(HOTSPOTS_LOCAL_PATH);
+		BufferedWriter writer = null;
+		try
+		{
+			if (!file.exists())
+			{
+				file.createNewFile();
+			}
+			writer = new BufferedWriter(new FileWriter(file));
+			writer.write(arr.toString());
+			writer.close();
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+		}
 	}
 }

@@ -209,6 +209,7 @@ public class MasterList
 			req.userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36");
 			req.header("Api-Key", key);
 			req.send(arr.toString());
+			req.code();
 		}
 		catch (Exception e)
 		{
@@ -229,7 +230,7 @@ public class MasterList
 			{
 				JSONObject data = new JSONObject(req.body());
 				JSONArray arr = data.getJSONArray("data");
-				for (int i = 0; i < data.length(); i++)
+				for (int i = 0; i < arr.length(); i++)
 				{
 					files.add(ShibbyFile.fromJSON(
 							arr.getJSONObject(i).toString()));
