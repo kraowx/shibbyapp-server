@@ -53,3 +53,11 @@ On success, returns all Patreon files in the format <code>{"type": "PATREON\_FIL
 
 ### Hotspots
 Returns the "hotspots" of all supported files in the form <code>{"type": HOTSPOTS, "data": [["id": &lt;FILE\_ID&gt;, "startTime": &lt;START\_TIME&gt;, "endTime": &lt;END\_TIME&gt;], ...]}</code>. Where &lt;FILE\_ID&gt; is the ID (SHA256 hash) of the file associated with the hotspot, &lt;START\_TIME&gt; is the starting time of the hotspot in milliseconds, and &lt;END\_TIME&gt; is the ending time of the hotspot in milliseconds. Also note that hotspots are locations within a file that are somewhat arbitrarily defined to attempt to produce a more intense reaction to Shibby's voice.
+
+## Used Libraries
+- [JSON-java](https://github.com/stleary/JSON-java)
+- [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
+- [Http Request](https://github.com/kevinsawicki/http-request)
+- [JSoup](https://github.com/jhy/jsoup)
+- [JAAD](http://jaadec.sourceforge.net)
+- [Ithaka Audio Info](https://github.com/beckchr/ithaka-audioinfo)
