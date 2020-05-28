@@ -14,9 +14,10 @@ import io.github.kraowx.shibbyappserver.tools.Version;
 
 public class Server extends NanoHTTPD
 {
-	public static final Version VERSION = new Version("2.1.0");
+	public static final Version VERSION = new Version("2.1.4");
 	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.0.0"),
-			new Version("2.0.1"), new Version("2.0.2"), new Version("2.1.0")};
+			new Version("2.0.1"), new Version("2.0.2"), new Version("2.1.0"),
+			new Version("2.1.1"), new Version("2.1.2"), new Version("2.1.3")};
 	private final String HTML_PATH = "index.html";
 	
 	private String html;
