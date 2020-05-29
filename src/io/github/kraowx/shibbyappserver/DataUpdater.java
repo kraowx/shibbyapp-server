@@ -14,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -28,16 +27,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.github.kevinsawicki.http.HttpRequest;
-
 import de.odysseus.ithaka.audioinfo.AudioInfo;
 import de.odysseus.ithaka.audioinfo.m4a.M4AInfo;
 import de.odysseus.ithaka.audioinfo.mp3.MP3Info;
-import io.github.kraowx.shibbyappserver.models.Hotspot;
 import io.github.kraowx.shibbyappserver.models.HotspotArray;
 import io.github.kraowx.shibbyappserver.models.MasterList;
 import io.github.kraowx.shibbyappserver.models.ShibbyFile;
-import io.github.kraowx.shibbyappserver.models.ShibbyFileArray;
 import io.github.kraowx.shibbyappserver.models.ShibbyTag;
 import io.github.kraowx.shibbyappserver.models.ShibbyTagFile;
 import io.github.kraowx.shibbyappserver.tools.AudioAnalysis;
