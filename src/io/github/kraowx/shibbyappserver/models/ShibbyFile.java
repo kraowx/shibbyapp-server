@@ -106,18 +106,25 @@ public class ShibbyFile
 		json.put("basic_info", basicInfo.toJSON());
 		json.put("audio_info", audioInfo.toJSON());
 		JSONArray tagsJson = new JSONArray();
-		for (String tag : tags)
+		if (tags != null)
 		{
-			tagsJson.put(tag);
+			for (String tag : tags)
+			{
+				tagsJson.put(tag);
+			}
 		}
 		json.put("tags", tagsJson);
-		if (hypnosisInfo != null) {
+		if (hypnosisInfo != null)
+		{
 			json.put("hypnosis_info", hypnosisInfo.toJSON());
 		}
 		JSONArray triggersJson = new JSONArray();
-		for (String trigger : triggers)
+		if (triggers != null)
 		{
-			triggersJson.put(trigger);
+			for (String trigger : triggers)
+			{
+				triggersJson.put(trigger);
+			}
 		}
 		json.put("triggers", triggersJson);
 		json.put("description", description);
