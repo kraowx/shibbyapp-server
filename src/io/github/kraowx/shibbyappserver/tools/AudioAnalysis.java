@@ -28,7 +28,7 @@ public class AudioAnalysis
 		try
 		{
 			MP4Container container = new MP4Container(
-					new URL(file.getLink()).openStream());
+					new URL(file.getAudioURL()).openStream());
 			Movie movie = container.getMovie();
 			List<Track> content = movie.getTracks();
 			if (content.isEmpty() || file.getDuration() == 0)

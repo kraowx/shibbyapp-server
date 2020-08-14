@@ -1,154 +1,189 @@
 package io.github.kraowx.shibbyappserver.models;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+/*
+ * ShibbyFile v3:
+ * 	(to match ShibbyDex)
+ * 
+ * + Name
+ * + Id (shibbydex uuid)
+ * + Version (shibbyfile version number)
+ * + ViewType (public/patreon/...)
+ * + Duration (milliseconds)
+ * + BasicInfo
+ *   + Author
+ *   + Artist
+ *   + Release
+ *   + Tone
+ *   + Setting
+ *   + Consent
+ *   + DS
+ *   + Orgasm
+ *   + Instructions
+ *   + IntendedEffect
+ * + AudioInfo
+ *   + FileType (full/clip/...)
+ *   + AudioType (stereo/mono/...)
+ *   + AudioUrl (direct to m4a/mp3)
+ *   + Effects
+ *   + Background (binaurals/naked/...)
+ * + Tags (string array)
+ * + HypnosisInfo
+ *   + Style (pure/...)
+ *   + Level (beginner/intermediate/advanced/...)
+ *   + Induction
+ *   + Deepener
+ *   + Body
+ *   + Wakener (true/false)
+ *   + Aftercare (true/false)
+ * + Triggers (string array)
+ * + Description
+ */
 public class ShibbyFile
 {
-	private String name, shortName, id,
-		link, description, type;
-	private long duration;
-	private List<String> tags;
-	private Map<String, String> extraData;
+	public static final int CURRENT_VERSION = 3;
+	public static final String DEFAULT_VIEW_TYPE = "public";
 	
-	public ShibbyFile(String name, String link,
-			String description, String type)
-	{
-		init(name, null, null, link, description, type, null);
-	}
+	private final String SHIBBYDEX_ROOT_URL = "https://shibbydex.com/";
+	private final String SHIBBYDEX_FILE_URL = SHIBBYDEX_ROOT_URL + "file/";
+	
+	private String name;
+	private String id;
+	private int version;
+	private String viewType;
+	private long duration;
+	private ShibbyBasicInfo basicInfo;
+	private ShibbyAudioInfo audioInfo;
+	private List<String> tags;
+	private ShibbyHypnosisInfo hypnosisInfo;
+	private List<String> triggers;
+	private String description;
 	
 	public ShibbyFile(String name, String id,
-			List<String> tags, String link, String description,
-			String type, Map<String, String> extraData)
-	{
-		init(name, id, tags, link, description, type, extraData);
-	}
-	
-	private void init(String name, String id,
-			List<String> tags, String link, String description,
-			String type, Map<String, String> extraData)
+			String description, String viewType, long duration)
 	{
 		this.name = name;
-		this.shortName = getShortNameFromName(name);
-		if (id == null && name != null)
-		{
-			createIdFromName();
-		}
-		if (tags != null)
-		{
-			this.tags = tags;
-		}
-		else
-		{
-			this.tags = getTagsFromName();
-		}
-		this.link = link;
+		this.id = id;
 		this.description = description;
-		this.type = type;
-		this.extraData = extraData != null ? extraData :
-			new HashMap<String, String>();
+		this.viewType = viewType;
+		this.duration = duration;
+//		init(name, fileUrl, description, type);
 	}
+	
+//	public ShibbyFile(String name, String id,
+//			List<String> tags, String link, String description,
+//			String type, Map<String, String> extraData)
+//	{
+//		init(name, id, tags, link, description, type, extraData);
+//	}
+	
+//	private void init(String name, String fileUrl, String description,
+//			String type)
+//	{
+//		this.name = name;
+////		this.link = link;
+//		this.description = description;
+//	}
 	
 	public JSONObject toJSON()
 	{
 		JSONObject json = new JSONObject();
 		json.put("name", name);
-		json.put("shortName", shortName);
+		json.put("id", id);
+		json.put("version", version);
+		json.put("view_type", viewType);
+		json.put("basic_info", basicInfo.toJSON());
+		json.put("audio_info", audioInfo.toJSON());
 		JSONArray tagsJson = new JSONArray();
 		for (String tag : tags)
 		{
 			tagsJson.put(tag);
 		}
 		json.put("tags", tagsJson);
-		json.put("link", link);
+		if (hypnosisInfo != null) {
+			json.put("hypnosis_info", hypnosisInfo.toJSON());
+		}
+		JSONArray triggersJson = new JSONArray();
+		for (String trigger : triggers)
+		{
+			triggersJson.put(trigger);
+		}
+		json.put("triggers", triggersJson);
 		json.put("description", description);
-		if (duration != 0)
-		{
-			json.put("duration", duration);
-		}
-		json.put("type", type);
-		JSONObject extras = new JSONObject();
-		for (String key : extraData.keySet())
-		{
-			extras.put(key, extraData.get(key));
-		}
-		json.put("extras", extras);
 		return json;
 	}
 	
 	public static ShibbyFile fromJSON(String jsonStr)
     {
-        ShibbyFile file = new ShibbyFile(null, null, null, null);
+        ShibbyFile file = new ShibbyFile(null, null, null, null, -1);
         JSONObject json = new JSONObject(jsonStr);
-        file.name = json.getString("name");
-        if (json.has("shortName"))
+        file.name = json.has("name") ? json.getString("name") : null;
+        file.id = json.has("id") ? json.getString("id") : null;
+        file.version = json.has("version") ? json.getInt("version") : 0;
+        file.viewType = json.has("view_type") ? json.getString("view_type") : DEFAULT_VIEW_TYPE;
+        file.basicInfo = json.has("basic_info") ?
+        		ShibbyBasicInfo.fromJSON(json.getJSONObject("basic_info")) :
+        			new ShibbyBasicInfo();
+        file.audioInfo = json.has("audio_info") ?
+        		ShibbyAudioInfo.fromJSON(json.getJSONObject("audio_info")) :
+        			new ShibbyAudioInfo();
+        file.tags = new ArrayList<String>();
+        for (Object tag : json.getJSONArray("tags"))
         {
-        	file.shortName = json.getString("shortName");
+        	file.tags.add((String)tag);
         }
-        else
-        {
-        	file.shortName = file.getShortNameFromName(file.name);
-        }
-        if (!json.has("id") && file.name != null)
-        {
-            file.createIdFromName();
-        }
-        else
-        {
-        	file.id = json.getString("id");
-        }
-        if (!json.has("tags") && file.name != null)
-        {
-        	file.tags = file.getTagsFromName();
-        }
-        else
-        {
-	        file.tags = new ArrayList<String>();
-	        for (Object tag : json.getJSONArray("tags"))
-	        {
-	        	file.tags.add((String)tag);
-	        }
-        }
-        if (json.has("link"))
-        {
-            file.link = json.getString("link");
-        }
-        else if (json.has("links"))
-        {
-            file.link = json.getJSONArray("links").getString(0);
-        }
+        file.hypnosisInfo = json.has("hypnosis_info") ?
+        		ShibbyHypnosisInfo.fromJSON(json.getJSONObject("hypnosis_info")) :
+        			new ShibbyHypnosisInfo();
         file.description = json.getString("description");
-        if (json.has("duration"))
-        {
-        	file.duration = json.getLong("duration");
-        }
-        if (!json.has("type"))
-        {
-        	file.type = "";
-        }
-        else
-        {
-        	file.type = json.getString("type");
-        }
-        file.extraData = new HashMap<String, String>();
-        if (json.has("extras"))
-        {
-	        JSONObject extras = json.getJSONObject("extras");
-	        for (String key : extras.keySet())
-	        {
-	        	file.extraData.put(key, extras.getString(key));
-	        }
-        }
         return file;
     }
+	
+	public void applyHTML(Document doc)
+	{
+		this.name = doc.select("h1[class*=display-4 text-center text-light shibbydex-font-accent]").text();
+//		this.id = getIdFromURL(fileUrl);
+		this.version = CURRENT_VERSION;
+		this.basicInfo = ShibbyBasicInfo.fromHTML(doc);
+		this.audioInfo = ShibbyAudioInfo.fromHTML(doc);
+		this.tags = getTagsFromHTML(doc);
+		this.hypnosisInfo = ShibbyHypnosisInfo.fromHTML(doc);
+		this.triggers = getTriggersFromHTML(doc);
+		this.description = doc.select("p[class*=lead text-light]").text();
+	}
+	
+	private List<String> getTagsFromHTML(Document doc)
+	{
+		return getCardsFromHTML(doc, 0);
+	}
+	
+	private List<String> getTriggersFromHTML(Document doc)
+	{
+		return getCardsFromHTML(doc, 1);
+	}
+	
+	private List<String> getCardsFromHTML(Document doc, int index)
+	{
+		Element container = doc.select("p[class*=col-12 card-text h4 text-center text-light]").get(index);
+		Elements cards = container.select("a");
+		List<String> items = new ArrayList<String>();
+		for (Element e : cards)
+		{
+			items.add(e.text());
+		}
+		return items;
+	}
 	
 	public String getName()
 	{
@@ -158,16 +193,6 @@ public class ShibbyFile
 	public void setName(String name)
 	{
 		this.name = name;
-	}
-	
-	public String getShortName()
-	{
-		return shortName;
-	}
-	
-	public void setShortName(String shortName)
-	{
-		this.shortName = shortName;
 	}
 	
 	public String getId()
@@ -180,44 +205,24 @@ public class ShibbyFile
 		this.id = id;
 	}
 	
-	public String getLink()
+	public int getVersion()
 	{
-		return link;
+		return version;
 	}
 	
-	public void setLink(String link)
+	public void setVersion(int version)
 	{
-		this.link = link;
+		this.version = version;
 	}
 	
-	public String getType()
+	public String getViewType()
 	{
-		return type;
+		return viewType;
 	}
 	
-	public void setType(String type)
+	public void setViewType(String viewType)
 	{
-		this.type = type;
-	}
-	
-	public String getDescription()
-	{
-		return description;
-	}
-	
-	public void setDescription(String description)
-	{
-		this.description = description;
-	}
-	
-	public List<String> getTags()
-	{
-		return tags;
-	}
-	
-	public void setTags(List<String> tags)
-	{
-		this.tags = tags;
+		this.viewType = viewType;
 	}
 	
 	public long getDuration()
@@ -230,213 +235,168 @@ public class ShibbyFile
 		this.duration = duration;
 	}
 	
-	public List<String> getTagsFromName()
+	public String getFileUrl()
 	{
-		List<String> tags = new ArrayList<String>();
-		if (name != null)
-		{
-			StringBuilder tag = new StringBuilder();
-			boolean in = false;
-			for (int i = 0; i < name.length(); i++)
-			{
-				char c = name.charAt(i);
-				if (c == ']')
-				{
-					tags.add(tag.toString());
-					tag.setLength(0);
-					in = false;
-				}
-				else if (c == '[')
-				{
-					in = true;
-				}
-				else if (c != '[' && in)
-				{
-					tag.append(c);
-				}
-			}
-		}
+		return SHIBBYDEX_FILE_URL + id + "?spoilers=1";
+	}
+	
+	public ShibbyBasicInfo getBasicInfo() {
+		return basicInfo;
+	}
+	
+	public String getAuthor()
+	{
+		return basicInfo.getAuthor();
+	}
+	
+	public String getArtist()
+	{
+		return basicInfo.getArtist();
+	}
+	
+	public String getReleaseDate()
+	{
+		return basicInfo.getRelease();
+	}
+	
+	public String getAudienceType()
+	{
+		return basicInfo.getAudience();
+	}
+	
+	public String getTone()
+	{
+		return basicInfo.getTone();
+	}
+	
+	public String getSetting()
+	{
+		return basicInfo.getSetting();
+	}
+	
+	public String getConsentType()
+	{
+		return basicInfo.getConsent();
+	}
+	
+	public String getDSType()
+	{
+		return basicInfo.getDS();
+	}
+	
+	public String getOrgasm()
+	{
+		return basicInfo.getOrgasm();
+	}
+	
+	public String getInstructions()
+	{
+		return basicInfo.getInstructions();
+	}
+	
+	public String getIntendedEffect()
+	{
+		return basicInfo.getIntendedEffect();
+	}
+	
+	public ShibbyAudioInfo getAudioInfo()
+	{
+		return audioInfo;
+	}
+	
+	public String getAudioFileType()
+	{
+		return audioInfo.getFileType();
+	}
+	
+	public String getAudioType()
+	{
+		return audioInfo.getAudioType();
+	}
+	
+	public String getAudioURL()
+	{
+		return audioInfo.getAudioURL();
+	}
+	
+	public String getAudioEffects()
+	{
+		return audioInfo.getEffects();
+	}
+		
+	public String getBackgroundType()
+	{
+		return audioInfo.getBackground();
+	}
+	
+	public List<String> getTags()
+	{
 		return tags;
 	}
 	
-	public String getShortNameFromName(String name)
+	public void setTags(List<String> tags)
 	{
-		Map<String, String> nameExceptions = getNameExceptions();
-		if (name == null)
-		{
-			return null;
-		}
-		else if (nameExceptions.containsKey(name))
-		{
-			return nameExceptions.get(name);
-		}
-		String tags = "";
-		char[] chars = name.toCharArray();
-		boolean in = true;
-		char c;
-		for (int i = 0; i < chars.length; i++)
-		{
-			c = chars[i];
-			// Check for beginning of tag
-			if (c == '[')
-			{
-				if (in && i != 0)
-				{
-					tags = "";
-					break;
-				}
-				in = true;
-			}
-			// Check for end of tag
-			else if (c == ']' || c == ')')
-			{
-				in = false;
-			}
-			// Check for end of all tags
-			else if (!in && c != ' ' && !hasOr(chars, i))
-			{
-				name = name.substring(i, name.length()-1);
-				break;
-			}
-			// Handle leading tags in the form "[xxx] or [xxx]"
-			if (hasOr(chars, i) && i+1 == 'r')
-			{
-				chars[i] = 'o';
-				chars[i+1] = 'r';
-			}
-			else
-			{
-				tags += c;
-			}
-		}
-		// Separate leading tags and name
-		if (!tags.endsWith(" "))
-		{
-			tags += " ";
-		}
-		if (!tags.contains("[") && !tags.contains("]"))
-		{
-			tags = "";
-		}
-		// Remove right tags
-		int rightIndex = name.indexOf('[');
-		if (rightIndex != -1)
-		{
-			name = name.substring(0, rightIndex);
-			if (name.length() > 0 && name.charAt(name.length()-1) == ' ')
-			{
-				name = name.substring(0, name.length()-1);
-			}
-		}
-		// Tag cleanup for consistency
-		tags = removeTagAfterLeading(tags);
-		tags = capitalizeLeadingTag(tags);
-		return tags + name;
+		this.tags = tags;
 	}
 	
-	/*
-	 * Checks if a string contains an "or" at the index i or the index i+1.
-	 */
-	private static boolean hasOr(char[] chars, int i)
+	public ShibbyHypnosisInfo getHypnosisInfo()
 	{
-		return (i+1 < chars.length && chars[i] == 'o' && chars[i+1] == 'r') ||
-				(i-1 > 0 && chars[i-1] == 'o' && chars[i] == 'r');
+		return hypnosisInfo;
 	}
 	
-	/*
-	 * Removes certain unwanted tags that immediately follow the leading tag.
-	 */
-	private static String removeTagAfterLeading(String tags)
+	public String getHypnosisStyle()
 	{
-		final String[] tagsToRemove = {"script fill", "script offer",
-				"secret santa", "deepener", "tomboy"};
-		int index = -1;
-		for (int i = 0; i < tagsToRemove.length && index == -1; i++)
-		{
-			index = tags.toLowerCase().indexOf(tagsToRemove[i]);
-			if (index != -1)
-			{
-				break;
-			}
-		}
-		int left = index-1;
-		if (left > 0 && tags.charAt(left-1) == ' ')
-		{
-			left--;
-		}
-		if (index != -1)
-		{
-			int right = index;
-			while (right < tags.length() && tags.charAt(right) != ']')
-			{
-				right++;
-			}
-			String tag = tags.substring(left, ++right);
-			return tags.replace(tag, "");
-		}
-		return tags;
+		return hypnosisInfo.getStyle();
 	}
 	
-	/*
-	 * Capitalizes up to the first 10 characters of the leading tag.
-	 * If leading tag is greater than 10 characters then no
-	 * characters are capitalized (assume it contains information
-	 * that shouldn't be capitalized).
-	 */
-	private static String capitalizeLeadingTag(String tags)
+	public String getHypnosisLevel()
 	{
-		int right = 0;
-		while (right < tags.length() && tags.charAt(right) != ']')
-		{
-			right++;
-		}
-		String oldTag = tags.substring(0, right);
-		return right < 9 ? tags.replace(oldTag, oldTag.toUpperCase()) : tags;
+		return hypnosisInfo.getLevel();
 	}
 	
-	/*
-	 * Unfortunately, some names can't be easily parsed by a generalization.
-	 * Older such names are mapped through this function, as they are
-	 * highly unlikely to be modified. Only names that would drastically
-	 * complicate the parsing algorithm are mapped here.
-	 */
-	private static Map<String, String> getNameExceptions()
+	public String getHypnosisInduction()
 	{
-		Map<String, String> exceptions = new HashMap<String, String>();
-		exceptions.put("[F4M Wake up JOI [Alarm Clock][5 minutes][Whispers][JOE][Script Fill]",
-				"[F4M] Wake up JOI");
-		exceptions.put("[F4M][ The Woman Who Knows You Better Than Anyone][light Fdom]" +
-				"[voyeur][stalking][fantasizing][masturbation][dirty talk][possession]" +
-				"[whispers] Script by /u/Belle_in_the_woods", "[F4M] The Woman Who Knows " +
-				"You Better Than Anyone");
-		return exceptions;
+		return hypnosisInfo.getInduction();
 	}
 	
-	private void createIdFromName()
+	public String getHypnosisDeepener()
 	{
-		try
-		{
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-	        byte[] hash = digest.digest(name.getBytes(StandardCharsets.UTF_8));
-	        StringBuffer hexString = new StringBuffer();
-
-	        for (int i = 0; i < hash.length; i++)
-	        {
-	            String hex = Integer.toHexString(0xFF & hash[i]);
-	            if (hex.length() == 1)
-	            {
-	            	hexString.append('0');
-	            }
-	            hexString.append(hex);
-	        }
-	        
-	        id = hexString.toString();
-		}
-		catch (NoSuchAlgorithmException nsae)
-		{
-			nsae.printStackTrace();
-			id = "";
-		}
+		return hypnosisInfo.getDeepener();
+	}
+	
+	public String getHypnosisBody()
+	{
+		return hypnosisInfo.getBody();
+	}
+	
+	public boolean hasWakener()
+	{
+		return hypnosisInfo.hasWakener();
+	}
+	
+	public boolean hasAftercare()
+	{
+		return hypnosisInfo.hasAftercare();
+	}
+	
+	public List<String> getTriggers()
+	{
+		return triggers;
+	}
+	
+	public void setTriggers(List<String> triggers)
+	{
+		this.triggers = triggers;
+	}
+	
+	public String getDescription()
+	{
+		return description;
+	}
+	
+	public void setDescription(String description)
+	{
+		this.description = description;
 	}
 	
 	@Override

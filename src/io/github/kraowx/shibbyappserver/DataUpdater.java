@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +37,7 @@ import io.github.kraowx.shibbyappserver.models.MasterList;
 import io.github.kraowx.shibbyappserver.models.ShibbyFile;
 import io.github.kraowx.shibbyappserver.models.ShibbyTag;
 import io.github.kraowx.shibbyappserver.models.ShibbyTagFile;
+import io.github.kraowx.shibbyappserver.net.ShibbyDexClient;
 import io.github.kraowx.shibbyappserver.tools.AudioAnalysis;
 import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
 import io.github.kraowx.shibbyappserver.tools.SortByFileCount;
@@ -59,6 +62,7 @@ public class DataUpdater
 	private List<HotspotArray> hotspots;
 	private JSONArray patreonFiles;
 	private MasterList masterList;
+	private ShibbyDexClient shibbydexClient;
 	private Timer timer;
 	
 	public DataUpdater(int interval, boolean forceUpdate,
@@ -82,6 +86,16 @@ public class DataUpdater
 		hotspots = new ArrayList<HotspotArray>();
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
+		System.out.println(FormattedOutput.get("Authenticating with ShibbyDex..."));
+		try
+		{
+			shibbydexClient = new ShibbyDexClient();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			System.out.println(FormattedOutput.get("ERROR: ShibbyDex login failed."));
+		}
 		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
 		patreonEnabled = checkPatreonEnabled();
 		if (patreonEnabled)
@@ -348,7 +362,7 @@ public class DataUpdater
 		// latest master list are not identical
 		if ((initialUpdate == 0 || initialUpdate == 2) &&
 				masterList.update(forceUpdate, remoteStorageEnabled,
-						remoteStorageUrl, remoteStorageKey))
+						remoteStorageUrl, remoteStorageKey, shibbydexClient))
 		{
 			List<ShibbyFile> newFiles = masterList.getFiles();
 			// A buffer is used so that the indices are not changed
@@ -383,12 +397,15 @@ public class DataUpdater
 						 * hundreds of times, which is why files must only be updated
 						 * if an update is actually needed
 						 */
-						Document doc = Jsoup.connect(newFile.getLink()).get();
-						Element js = doc.select("script[type*=text/javascript]").get(1);
-						String jss = js.toString();
-						jss = jss.substring(jss.indexOf("m4a: \"")+6);
-						jss = jss.substring(0, jss.indexOf("\""));
-						newFile.setLink(jss);
+//						Document doc = Jsoup.connect(newFile.getLink()).get();
+//						Element js = doc.select("script[type*=text/javascript]").get(1);
+//						String jss = js.toString();
+//						jss = jss.substring(jss.indexOf("m4a: \"")+6);
+//						jss = jss.substring(0, jss.indexOf("\""));
+						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
+						newFile.applyHTML(doc);
+						System.out.println(newFile.getName());
+						System.out.println(newFile.toJSON());
 						if (includeFileDuration)
 						{
 							newFile.setDuration(getFileDuration(newFile));
@@ -444,45 +461,45 @@ public class DataUpdater
 	 */
 	private void applyLocalFileChanges()
 	{
-		for (int i = 0; i < files.size(); i++)
-		{
-			ShibbyFile file = files.get(i);
-			String latestShortName = file.getShortNameFromName(file.getName());
-			List<String> latestTags = file.getTagsFromName();
-			HotspotArray fileHotspots = getFileHotspots(file);
-			if (!file.getShortName().equals(latestShortName) ||
-					!file.getTags().toString().equals(latestTags.toString()) ||
-					(file.getDuration() == 0 && includeFileDuration) ||
-					(file.getType() == null || (file.getType() != null &&
-					file.getType().isEmpty())) || fileNeedsHotspotsUpdate(file, fileHotspots))
-			{
-				System.out.println(FormattedOutput.get("Applying local changes to file " +
-						(i+1) + "/" + files.size() + "..."));
-			}
-			// Compare local shortName to shortName based on original file name
-			if (!file.getShortName().equals(latestShortName))
-			{
-				file.setShortName(latestShortName);
-			}
-			if (!file.getTags().toString().equals(latestTags.toString()))
-			{
-				file.setTags(latestTags);
-			}
-			if (file.getDuration() == 0 && includeFileDuration)
-			{
-				System.out.println(FormattedOutput.get("Calculating file duration..."));
-				file.setDuration(getFileDuration(file));
-			}
-			if (file.getType() == null || (file.getType() != null && file.getType().isEmpty()))
-			{
-				file.setType("soundgasm");
-			}
-			if (fileNeedsHotspotsUpdate(file, fileHotspots))
-			{
-				System.out.println(FormattedOutput.get("Calculating file hotspots..."));
-				updateFileHotspots(file, fileHotspots);
-			}
-		}
+//		for (int i = 0; i < files.size(); i++)
+//		{
+//			ShibbyFile file = files.get(i);
+//			String latestShortName = file.getShortNameFromName(file.getName());
+//			List<String> latestTags = file.getTagsFromName();
+//			HotspotArray fileHotspots = getFileHotspots(file);
+//			if (!file.getShortName().equals(latestShortName) ||
+//					!file.getTags().toString().equals(latestTags.toString()) ||
+//					(file.getDuration() == 0 && includeFileDuration) ||
+//					(file.getType() == null || (file.getType() != null &&
+//					file.getType().isEmpty())) || fileNeedsHotspotsUpdate(file, fileHotspots))
+//			{
+//				System.out.println(FormattedOutput.get("Applying local changes to file " +
+//						(i+1) + "/" + files.size() + "..."));
+//			}
+//			// Compare local shortName to shortName based on original file name
+//			if (!file.getShortName().equals(latestShortName))
+//			{
+//				file.setShortName(latestShortName);
+//			}
+//			if (!file.getTags().toString().equals(latestTags.toString()))
+//			{
+//				file.setTags(latestTags);
+//			}
+//			if (file.getDuration() == 0 && includeFileDuration)
+//			{
+//				System.out.println(FormattedOutput.get("Calculating file duration..."));
+//				file.setDuration(getFileDuration(file));
+//			}
+//			if (file.getType() == null || (file.getType() != null && file.getType().isEmpty()))
+//			{
+//				file.setType("soundgasm");
+//			}
+//			if (fileNeedsHotspotsUpdate(file, fileHotspots))
+//			{
+//				System.out.println(FormattedOutput.get("Calculating file hotspots..."));
+//				updateFileHotspots(file, fileHotspots);
+//			}
+//		}
 	}
 	
 	/*
@@ -493,44 +510,45 @@ public class DataUpdater
 	 */
 	private long getFileDuration(ShibbyFile file)
 	{
-		long duration = 0;
-		URL url = null;
-		try
-		{
-			url = new URL(file.getLink());
-		}
-		catch (MalformedURLException mue)
-		{
-			System.out.println(FormattedOutput.get(
-					"ERROR: Failed to get file duration."));
-		}
-		try (InputStream input = url.openStream())
-		{
-			if (file.getLink().endsWith(".m4a"))
-			{
-				AudioInfo audioInfo = new M4AInfo(input);
-				duration = audioInfo.getDuration();
-				input.close();
-			}
-			else if (file.getLink().endsWith(".mp3"))
-			{
-				HttpURLConnection conn;
-				conn = (HttpURLConnection)url.openConnection();
-				conn.setRequestMethod("HEAD");
-	            conn.getInputStream(); 
-	            long size = BigInteger.valueOf(conn.getContentLength()).longValue();
-	            conn.getInputStream().close();
-	            AudioInfo audioInfo = new MP3Info(input, size);
-				duration = audioInfo.getDuration();
-				input.close();
-			}
-		}
-		catch (Exception e)
-		{
-			System.out.println(FormattedOutput.get(
-					"ERROR: Failed to get file duration."));
-		}
-		return duration;
+//		long duration = 0;
+//		URL url = null;
+//		try
+//		{
+//			url = new URL(file.getLink());
+//		}
+//		catch (MalformedURLException mue)
+//		{
+//			System.out.println(FormattedOutput.get(
+//					"ERROR: Failed to get file duration."));
+//		}
+//		try (InputStream input = url.openStream())
+//		{
+//			if (file.getLink().endsWith(".m4a"))
+//			{
+//				AudioInfo audioInfo = new M4AInfo(input);
+//				duration = audioInfo.getDuration();
+//				input.close();
+//			}
+//			else if (file.getLink().endsWith(".mp3"))
+//			{
+//				HttpURLConnection conn;
+//				conn = (HttpURLConnection)url.openConnection();
+//				conn.setRequestMethod("HEAD");
+//	            conn.getInputStream(); 
+//	            long size = BigInteger.valueOf(conn.getContentLength()).longValue();
+//	            conn.getInputStream().close();
+//	            AudioInfo audioInfo = new MP3Info(input, size);
+//				duration = audioInfo.getDuration();
+//				input.close();
+//			}
+//		}
+//		catch (Exception e)
+//		{
+//			System.out.println(FormattedOutput.get(
+//					"ERROR: Failed to get file duration."));
+//		}
+//		return duration;
+		return -1;
 	}
 	
 	/*

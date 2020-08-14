@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,10 +20,13 @@ import org.jsoup.select.Elements;
 
 import com.github.kevinsawicki.http.HttpRequest;
 
+import io.github.kraowx.shibbyappserver.net.ShibbyDexClient;
+
 public class MasterList
 {
-	public static final String MASTER_LIST_URL = "https://soundgasm.net/u/kinkyshibby";
-	public static final String LOCAL_LIST_PATH = "sgData.json";
+//	public static final String MASTER_LIST_URL = "https://soundgasm.net/u/kinkyshibby";
+	public static final String MASTER_LIST_URL = "https://shibbydex.com/files";
+	public static final String LOCAL_LIST_PATH = "sdData.json";
 	
 	private List<ShibbyFile> files;
 	private Document doc;
@@ -41,11 +46,12 @@ public class MasterList
 	 * Can be overridden to force an update.
 	 */
 	public boolean update(boolean force, boolean remoteEnabled,
-			String url, String key)
+			String url, String key, ShibbyDexClient shibbydexClient)
 	{
 		try
 		{
-			Document doc = Jsoup.connect(MASTER_LIST_URL).get();
+//			Document doc = Jsoup.connect(MASTER_LIST_URL).get();
+			Document doc = shibbydexClient.getHTMLResource(MASTER_LIST_URL);
 			if (force || updateNeeded(doc, remoteEnabled, url, key))
 			{
 				this.doc = doc;
@@ -109,21 +115,81 @@ public class MasterList
 		return false;
 	}
 	
+//	/*
+//	 * Converts an HTML formatted master list to a list of shibbyfiles.
+//	 */
+//	private List<ShibbyFile> parseDocument(Document doc)
+//	{
+//		Elements soundsDetails = doc.select("div[class*=sound-details]");
+//		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
+//		for (Element details : soundsDetails)
+//		{
+//			String name = details.select("a").text();
+//			String link = details.select("a").first().attr("href");
+//			String description = details.select("span[class*=soundDescription]").text();
+//			files.add(new ShibbyFile(name, link, description, "soundgasm"));
+//		}
+//		return files;
+//	}
+	
+//	/*
+//	 * Converts an HTML formatted master list to a list of shibbyfiles.
+//	 */
+//	private List<ShibbyFile> parseDocument(Document doc)
+//	{
+//		Elements soundsDetails = doc.select("a[class*=card-link]");
+//		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
+//		for (Element details : soundsDetails)
+//		{
+//			String name = details.select("a").first().text();
+//			String id = getFileIdFromURL(details.select("a").first().attr("href"));
+//			files.add(new ShibbyFile(name, id, null, "public"));
+//		}
+//		return files;
+//	}
+	
 	/*
 	 * Converts an HTML formatted master list to a list of shibbyfiles.
 	 */
 	private List<ShibbyFile> parseDocument(Document doc)
 	{
-		Elements soundsDetails = doc.select("div[class*=sound-details]");
+		Elements cards = doc.select("div[class*=card file-card]");
 		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
-		for (Element details : soundsDetails)
+		for (Element card : cards)
 		{
-			String name = details.select("a").text();
-			String link = details.select("a").first().attr("href");
-			String description = details.select("span[class*=soundDescription]").text();
-			files.add(new ShibbyFile(name, link, description, "soundgasm"));
+			Element link = card.select("a[class*=card-link]").first();
+			String name = link.text();
+			String id = getFileIdFromURL(link.attr("href"));
+			String description = card.select("p[class*=card-text text-light]").text();
+			String durationStr = card.select("dt[class*=text-center col-sm-3]").get(1).text();
+			if (durationStr.contains("File Length:"))
+			{
+				durationStr = durationStr.substring(durationStr.indexOf(":")+2);
+			}
+			long duration = parseDuration(durationStr);
+			files.add(new ShibbyFile(name, id, description, "public", duration));
 		}
 		return files;
+	}
+	
+	private String getFileIdFromURL(String url)
+	{
+		Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+		Matcher matcher = pattern.matcher(url);
+		matcher.find();
+		return matcher.group();
+	}
+	
+	private static long parseDuration(String timeStr)
+	{
+		long time = 0;
+		String[] units = timeStr.split(" ");
+		for (int i = 0; i < units.length; i++)
+		{
+			int unit = Integer.parseInt(units[i].substring(0, units[i].length()-1));
+			time += (unit*Math.pow(60, units.length-i-1)*1000);
+		}
+		return time;
 	}
 	
 	/*
