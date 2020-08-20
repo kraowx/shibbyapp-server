@@ -101,52 +101,30 @@ public class MasterList
 		}
 		// Lists are the same size, so compare each file to check
 		// for any difference between their contents
+//		for (int i = 0; i < files.size(); i++)
+//		{
+//			ShibbyFile fileOld = this.files.get(i);
+//			ShibbyFile fileNew = filesNew.get(i);
+//			if (!fileOld.getName().equals(fileNew.getName()) ||
+//					!fileOld.getDescription().equals(fileNew.getDescription()) ||
+//					!fileOld.getTags().equals(fileNew.getTags()))
+//			{
+//				return true;
+//			}
+//		}
 		for (int i = 0; i < files.size(); i++)
 		{
 			ShibbyFile fileOld = this.files.get(i);
 			ShibbyFile fileNew = filesNew.get(i);
 			if (!fileOld.getName().equals(fileNew.getName()) ||
 					!fileOld.getDescription().equals(fileNew.getDescription()) ||
-					!fileOld.getTags().equals(fileNew.getTags()))
+					fileOld.getDuration() != fileNew.getDuration())
 			{
 				return true;
 			}
 		}
 		return false;
 	}
-	
-//	/*
-//	 * Converts an HTML formatted master list to a list of shibbyfiles.
-//	 */
-//	private List<ShibbyFile> parseDocument(Document doc)
-//	{
-//		Elements soundsDetails = doc.select("div[class*=sound-details]");
-//		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
-//		for (Element details : soundsDetails)
-//		{
-//			String name = details.select("a").text();
-//			String link = details.select("a").first().attr("href");
-//			String description = details.select("span[class*=soundDescription]").text();
-//			files.add(new ShibbyFile(name, link, description, "soundgasm"));
-//		}
-//		return files;
-//	}
-	
-//	/*
-//	 * Converts an HTML formatted master list to a list of shibbyfiles.
-//	 */
-//	private List<ShibbyFile> parseDocument(Document doc)
-//	{
-//		Elements soundsDetails = doc.select("a[class*=card-link]");
-//		List<ShibbyFile> files = new ArrayList<ShibbyFile>();
-//		for (Element details : soundsDetails)
-//		{
-//			String name = details.select("a").first().text();
-//			String id = getFileIdFromURL(details.select("a").first().attr("href"));
-//			files.add(new ShibbyFile(name, id, null, "public"));
-//		}
-//		return files;
-//	}
 	
 	/*
 	 * Converts an HTML formatted master list to a list of shibbyfiles.
@@ -160,14 +138,14 @@ public class MasterList
 			Element link = card.select("a[class*=card-link]").first();
 			String name = link.text();
 			String id = getFileIdFromURL(link.attr("href"));
-			String description = card.select("p[class*=card-text text-light]").text();
+//			String description = card.select("p[class*=card-text text-light]").text();
 			String durationStr = card.select("dt[class*=text-center col-sm-3]").get(1).text();
 			if (durationStr.contains("File Length:"))
 			{
 				durationStr = durationStr.substring(durationStr.indexOf(":")+2);
 			}
 			long duration = parseDuration(durationStr);
-			files.add(new ShibbyFile(name, id, description, "public", duration));
+			files.add(new ShibbyFile(name, id, "public", duration));
 		}
 		return files;
 	}

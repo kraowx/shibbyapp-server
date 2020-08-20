@@ -86,16 +86,7 @@ public class DataUpdater
 		hotspots = new ArrayList<HotspotArray>();
 		patreonFiles = new JSONArray();
 		masterList = new MasterList();
-		System.out.println(FormattedOutput.get("Authenticating with ShibbyDex..."));
-		try
-		{
-			shibbydexClient = new ShibbyDexClient();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			System.out.println(FormattedOutput.get("ERROR: ShibbyDex login failed."));
-		}
+		shibbydexClient = new ShibbyDexClient();
 		System.out.println(FormattedOutput.get("Checking Patreon updates status..."));
 		patreonEnabled = checkPatreonEnabled();
 		if (patreonEnabled)
@@ -310,6 +301,19 @@ public class DataUpdater
 			System.out.println(FormattedOutput.get("Updating Patreon data..."));
 		}
 		updatePatreonData();
+		if (shibbydexClient.updateNeeded())
+		{
+			System.out.println(FormattedOutput.get("Authenticating with ShibbyDex..."));
+			try
+			{
+				shibbydexClient.updateAuthenticatedCookie();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				System.out.println(FormattedOutput.get("ERROR: ShibbyDex login failed."));
+			}
+		}
 		if (initialUpdate == 0 || initialUpdate == 2)
 		{
 			System.out.println(FormattedOutput.get("Updating soundgasm master file list..."));
@@ -851,14 +855,12 @@ public class DataUpdater
 	}
 	
 	/*
-	 * Checks if the names, tags, and descriptions of two files match.
-	 * On the surface, files are nearly identical at this point.
+	 * Checks if the names of two files match.
+	 * <s>On the surface, files are nearly identical at this point.</s>
 	 */
 	private boolean filesMostlyEqual(ShibbyFile file1, ShibbyFile file2)
 	{
-		return file1.getName().equals(file2.getName()) &&
-				file1.getDescription().equals(file2.getDescription()) &&
-				file1.getTags().equals(file2.getTags());
+		return file1.getName().equals(file2.getName());
 	}
 	
 	/*

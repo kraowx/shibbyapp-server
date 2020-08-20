@@ -2,9 +2,6 @@ package io.github.kraowx.shibbyappserver.models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,7 +30,7 @@ import org.jsoup.select.Elements;
  *   + Instructions
  *   + IntendedEffect
  * + AudioInfo
- *   + FileType (full/clip/...)
+ *   + FileType (full/clip/series/...)
  *   + AudioType (stereo/mono/...)
  *   + AudioUrl (direct to m4a/mp3)
  *   + Effects
@@ -71,30 +68,13 @@ public class ShibbyFile
 	private String description;
 	
 	public ShibbyFile(String name, String id,
-			String description, String viewType, long duration)
+			String viewType, long duration)
 	{
 		this.name = name;
 		this.id = id;
-		this.description = description;
 		this.viewType = viewType;
 		this.duration = duration;
-//		init(name, fileUrl, description, type);
 	}
-	
-//	public ShibbyFile(String name, String id,
-//			List<String> tags, String link, String description,
-//			String type, Map<String, String> extraData)
-//	{
-//		init(name, id, tags, link, description, type, extraData);
-//	}
-	
-//	private void init(String name, String fileUrl, String description,
-//			String type)
-//	{
-//		this.name = name;
-////		this.link = link;
-//		this.description = description;
-//	}
 	
 	public JSONObject toJSON()
 	{
@@ -103,6 +83,7 @@ public class ShibbyFile
 		json.put("id", id);
 		json.put("version", version);
 		json.put("view_type", viewType);
+		json.put("duration", duration);
 		json.put("basic_info", basicInfo.toJSON());
 		json.put("audio_info", audioInfo.toJSON());
 		JSONArray tagsJson = new JSONArray();
@@ -133,12 +114,13 @@ public class ShibbyFile
 	
 	public static ShibbyFile fromJSON(String jsonStr)
     {
-        ShibbyFile file = new ShibbyFile(null, null, null, null, -1);
+        ShibbyFile file = new ShibbyFile(null, null, null, -1);
         JSONObject json = new JSONObject(jsonStr);
         file.name = json.has("name") ? json.getString("name") : null;
         file.id = json.has("id") ? json.getString("id") : null;
         file.version = json.has("version") ? json.getInt("version") : 0;
         file.viewType = json.has("view_type") ? json.getString("view_type") : DEFAULT_VIEW_TYPE;
+        file.duration = json.has("duration") ? json.getLong("duration") : 0;
         file.basicInfo = json.has("basic_info") ?
         		ShibbyBasicInfo.fromJSON(json.getJSONObject("basic_info")) :
         			new ShibbyBasicInfo();
@@ -153,6 +135,11 @@ public class ShibbyFile
         file.hypnosisInfo = json.has("hypnosis_info") ?
         		ShibbyHypnosisInfo.fromJSON(json.getJSONObject("hypnosis_info")) :
         			new ShibbyHypnosisInfo();
+        file.triggers = new ArrayList<String>();
+        for (Object trigger : json.getJSONArray("triggers"))
+        {
+        	file.triggers.add((String)trigger);
+        }
         file.description = json.getString("description");
         return file;
     }
@@ -247,7 +234,8 @@ public class ShibbyFile
 		return SHIBBYDEX_FILE_URL + id + "?spoilers=1";
 	}
 	
-	public ShibbyBasicInfo getBasicInfo() {
+	public ShibbyBasicInfo getBasicInfo()
+	{
 		return basicInfo;
 	}
 	
@@ -331,7 +319,7 @@ public class ShibbyFile
 		return audioInfo.getEffects();
 	}
 		
-	public String getBackgroundType()
+	public String getAudioBackground()
 	{
 		return audioInfo.getBackground();
 	}

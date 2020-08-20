@@ -2,11 +2,11 @@ package io.github.kraowx.shibbyappserver.net;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -24,8 +24,6 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import io.github.kraowx.shibbyappserver.tools.FormattedOutput;
-
 public class ShibbyDexClient {
 	private final long COOKIE_LIFESPAN = 7200*1000;
 	private final long COOKIE_REFRESH = COOKIE_LIFESPAN - 60*1000;
@@ -34,13 +32,14 @@ public class ShibbyDexClient {
 	private final String SHIBBYDEX_PASSWORD = "wsPOdW1M9YKJFuva3la9X4ZDBVgRi7l0";
 	
 	private String authCookie;
+	private Date lastUpdate;
 	
-	private Timer authTimer;
+//	private Timer authTimer;
 	
-	public ShibbyDexClient() throws IOException {
-		authCookie = getAuthenticatedCookie();
-		startReauthTimer();
-	}
+//	public ShibbyDexClient() throws IOException {
+//		updateAuthenticatedCookie();
+////		startReauthTimer();
+//	}
 	
 	public Document getHTMLResource(String url) throws IOException {
 		if (authCookie != null) {
@@ -63,37 +62,42 @@ public class ShibbyDexClient {
 		throw new IOException("Client is not authenticated!");
 	}
 	
-	public void startReauthTimer() {
-		if (authTimer == null) {
-			authTimer = new Timer();
-			authTimer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					System.out.println(FormattedOutput.get("Re-authenticating with ShibbyDex..."));
-					try {
-						authCookie = getAuthenticatedCookie();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					System.out.println(FormattedOutput.get("Re-authentication complete."));
-				}
-			}, COOKIE_REFRESH, COOKIE_REFRESH);
-		}
-	}
+//	public void startReauthTimer() {
+//		if (authTimer == null) {
+//			authTimer = new Timer();
+//			authTimer.scheduleAtFixedRate(new TimerTask() {
+//				@Override
+//				public void run() {
+//					System.out.println(FormattedOutput.get("Re-authenticating with ShibbyDex..."));
+//					try {
+//						authCookie = getAuthenticatedCookie();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//					System.out.println(FormattedOutput.get("Re-authentication complete."));
+//				}
+//			}, COOKIE_REFRESH, COOKIE_REFRESH);
+//		}
+//	}
+//	
+//	public void stopReauthTimer() {
+//		if (authTimer != null) {
+//			authTimer.cancel();
+//			authTimer.purge();
+//			authTimer = null;
+//		}
+//	}
 	
-	public void stopReauthTimer() {
-		if (authTimer != null) {
-			authTimer.cancel();
-			authTimer.purge();
-			authTimer = null;
-		}
+	public boolean updateNeeded() {
+		Date now = Calendar.getInstance().getTime();
+		return lastUpdate == null || lastUpdate.compareTo(now) >= COOKIE_REFRESH;
 	}
 	
 	/*
 	 * Creates an authenticated session cookie.
 	 * This gives the client access to all areas of ShibbyDex.
 	 */
-	private String getAuthenticatedCookie() throws IOException {
+	public void updateAuthenticatedCookie() throws IOException {
 		CloseableHttpClient httpclient = HttpClientBuilder.create()
 				.setRedirectStrategy(new LaxRedirectStrategy()).build();
 		String newSessionCookie = getNewSessionCookie(httpclient);
@@ -107,7 +111,8 @@ public class ShibbyDexClient {
 //		System.out.println(resp.getBody());
 //		System.out.println(resp.getStatus());
 //		System.out.println(resp.getCookies());
-		return parseAuthCookie(resp);
+		lastUpdate = Calendar.getInstance().getTime();
+		authCookie = parseAuthCookie(resp);
 	}
 	
 	/*
