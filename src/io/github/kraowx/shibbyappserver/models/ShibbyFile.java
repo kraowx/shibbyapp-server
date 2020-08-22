@@ -84,8 +84,12 @@ public class ShibbyFile
 		json.put("version", version);
 		json.put("view_type", viewType);
 		json.put("duration", duration);
-		json.put("basic_info", basicInfo.toJSON());
-		json.put("audio_info", audioInfo.toJSON());
+		if (basicInfo != null) {
+			json.put("basic_info", basicInfo.toJSON());
+		}
+		if (audioInfo != null) {
+			json.put("audio_info", audioInfo.toJSON());
+		}
 		JSONArray tagsJson = new JSONArray();
 		if (tags != null)
 		{

@@ -50,6 +50,11 @@ public class DataUpdater
 	public static final String ONLINE_STORAGE_PATH = "remoteStorage";
 	public static final String HOTSPOTS_LOCAL_PATH = "hotspots.json";
 	
+	public static final int EXCLUDE_NONE = 0;
+	public static final int EXCLUDE_SOUNDGASM = 1;
+	public static final int EXCLUDE_PATREON = 2;
+	public static final int EXCLUDE_ALL = 3;
+	
 	private final int HOTSPOTS_VERSION = 0;
 	
 	private int interval, initialUpdate;
@@ -288,7 +293,7 @@ public class DataUpdater
 	private void update()
 	{
 		long startTime = Calendar.getInstance().getTime().getTime();
-		if (initialUpdate != 3)
+		if (initialUpdate != EXCLUDE_ALL)
 		{
 			System.out.println(FormattedOutput.get("Starting data update..."));
 		}
@@ -296,12 +301,12 @@ public class DataUpdater
 		{
 			System.out.println(FormattedOutput.get("Starting local data update..."));
 		}
-		if (patreonEnabled && initialUpdate != 2 && initialUpdate != 3)
+		if (patreonEnabled && initialUpdate != EXCLUDE_PATREON && initialUpdate != EXCLUDE_ALL)
 		{
 			System.out.println(FormattedOutput.get("Updating Patreon data..."));
 		}
 		updatePatreonData();
-		if (shibbydexClient.updateNeeded())
+		if (shibbydexClient.updateNeeded() && initialUpdate != EXCLUDE_SOUNDGASM && initialUpdate != EXCLUDE_ALL)
 		{
 			System.out.println(FormattedOutput.get("Authenticating with ShibbyDex..."));
 			try
@@ -314,7 +319,7 @@ public class DataUpdater
 				System.out.println(FormattedOutput.get("ERROR: ShibbyDex login failed."));
 			}
 		}
-		if (initialUpdate == 0 || initialUpdate == 2)
+		if (initialUpdate == EXCLUDE_NONE || initialUpdate == EXCLUDE_PATREON)
 		{
 			System.out.println(FormattedOutput.get("Updating soundgasm master file list..."));
 		}
@@ -327,7 +332,7 @@ public class DataUpdater
 		applyLocalFileChanges();
 		System.out.println(FormattedOutput.get("Updating tags..."));
 		updateTags();
-		if (initialUpdate == 0 || initialUpdate == 2)
+		if (initialUpdate == EXCLUDE_NONE || initialUpdate == EXCLUDE_PATREON)
 		{
 			System.out.println(FormattedOutput.get("Writing soundgasm master file list to '" +
 					MasterList.LOCAL_LIST_PATH + "'..."));
@@ -364,7 +369,7 @@ public class DataUpdater
 	{
 		// Only update if the local master list and the
 		// latest master list are not identical
-		if ((initialUpdate == 0 || initialUpdate == 2) &&
+		if ((initialUpdate == EXCLUDE_NONE || initialUpdate == EXCLUDE_PATREON) &&
 				masterList.update(forceUpdate, remoteStorageEnabled,
 						remoteStorageUrl, remoteStorageKey, shibbydexClient))
 		{
@@ -401,19 +406,14 @@ public class DataUpdater
 						 * hundreds of times, which is why files must only be updated
 						 * if an update is actually needed
 						 */
-//						Document doc = Jsoup.connect(newFile.getLink()).get();
-//						Element js = doc.select("script[type*=text/javascript]").get(1);
-//						String jss = js.toString();
-//						jss = jss.substring(jss.indexOf("m4a: \"")+6);
-//						jss = jss.substring(0, jss.indexOf("\""));
 						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
 						newFile.applyHTML(doc);
 						System.out.println(newFile.getName());
 						System.out.println(newFile.toJSON());
-						if (includeFileDuration)
-						{
-							newFile.setDuration(getFileDuration(newFile));
-						}
+//						if (includeFileDuration)
+//						{
+//							newFile.setDuration(getFileDuration(newFile));
+//						}
 						if (oldFile != null && oldFile.getName().equals(newFile.getName()))
 						{
 							// If a local file with the same name already exists,
@@ -443,12 +443,12 @@ public class DataUpdater
 			}
 			files = filesTemp;
 		}
-		else if (initialUpdate != 1 && initialUpdate != 3)
+		else if (initialUpdate != EXCLUDE_SOUNDGASM && initialUpdate != EXCLUDE_ALL)
 		{
 			System.out.println(FormattedOutput.
 					get("Master list is up to date."));
 		}
-		else if (initialUpdate == 1 || initialUpdate == 3)
+		else if (initialUpdate == EXCLUDE_SOUNDGASM || initialUpdate == EXCLUDE_ALL)
 		{
 			files = masterList.readLocalList();
 		}
@@ -562,7 +562,7 @@ public class DataUpdater
 	 */
 	private void updatePatreonData()
 	{
-		if (patreonEnabled && initialUpdate != 2 && initialUpdate != 3)
+		if (patreonEnabled && initialUpdate != EXCLUDE_PATREON && initialUpdate != EXCLUDE_ALL)
 		{
 			Process process;
 			BufferedReader in;

@@ -101,18 +101,18 @@ public class Main
 					"This will not only cause the server to take longer to update, " +
 					"but it will also put more stress on the soundgasm servers");
 		}
-		int initialUpdate = 0;
+		int initialUpdate = DataUpdater.EXCLUDE_NONE;
 		if (noSoundgasm)
 		{
-			initialUpdate = 1;
+			initialUpdate = DataUpdater.EXCLUDE_SOUNDGASM;
 		}
 		if (noPatreon)
 		{
-			initialUpdate = 2;
+			initialUpdate = DataUpdater.EXCLUDE_PATREON;
 		}
 		if (noUpdate || (noSoundgasm && noPatreon))
 		{
-			initialUpdate = 3;
+			initialUpdate = DataUpdater.EXCLUDE_ALL;
 		}
 		try
 		{
