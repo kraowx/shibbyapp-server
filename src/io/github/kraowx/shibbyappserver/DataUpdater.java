@@ -408,8 +408,6 @@ public class DataUpdater
 						 */
 						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
 						newFile.applyHTML(doc);
-						System.out.println(newFile.getName());
-						System.out.println(newFile.toJSON());
 //						if (includeFileDuration)
 //						{
 //							newFile.setDuration(getFileDuration(newFile));
