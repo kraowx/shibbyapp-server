@@ -139,7 +139,17 @@ public class MasterList
 			String name = link.text();
 			String id = getFileIdFromURL(link.attr("href"));
 //			String description = card.select("p[class*=card-text text-light]").text();
-			String durationStr = card.select("dt[class*=text-center col-sm-3]").get(1).text();
+//			String durationStr = card.select("dt[class*=text-center col-sm-3]").get(1).text();
+			Elements rowElms = card.select("dl[class*=row]").select("dt");
+			String durationStr = "";
+			for (Element e : rowElms)
+			{
+				if (e.text().contains("File Length: "))
+				{
+					durationStr = e.text().substring(e.text().indexOf(":")+2);
+					break;
+				}
+			}
 			if (durationStr.contains("File Length:"))
 			{
 				durationStr = durationStr.substring(durationStr.indexOf(":")+2);
