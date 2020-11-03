@@ -2,6 +2,7 @@ package io.github.kraowx.shibbyappserver.models;
 
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class ShibbyBasicInfo {
@@ -18,21 +19,33 @@ public class ShibbyBasicInfo {
 	private String intendedEffect;
 	
 	public static ShibbyBasicInfo fromHTML(Document doc) {
-		Elements tableInfo1 = doc.select("dd[class*=col-sm-3]");
+		Elements keyTable1 = doc.select("dt[class*=col-sm-3]");
+		Elements valueTable1 = doc.select("dd[class*=col-sm-3]");
 		ShibbyBasicInfo basicInfo = new ShibbyBasicInfo();
-		basicInfo.author = tableInfo1.get(0).text();
-		basicInfo.artist = tableInfo1.get(1).text();
-		basicInfo.release = tableInfo1.get(2).text();
-		basicInfo.audience = tableInfo1.get(3).text();
-		basicInfo.tone = tableInfo1.get(4).text();
-		basicInfo.setting = tableInfo1.get(5).text();
-		basicInfo.consent = tableInfo1.get(6).text();
-		basicInfo.ds = tableInfo1.get(7).text();
-		Elements tableInfo2 = doc.select("dd[class*=col-sm-9]");
-		basicInfo.orgasm = tableInfo2.get(0).text();
-		basicInfo.instructions = tableInfo2.get(1).text();
-		basicInfo.intendedEffect = tableInfo2.get(2).text();
+		basicInfo.author = getField("author", keyTable1, valueTable1);
+		basicInfo.artist = getField("artist", keyTable1, valueTable1);
+		basicInfo.release = getField("release date", keyTable1, valueTable1);
+		basicInfo.audience = getField("audience", keyTable1, valueTable1);
+		basicInfo.tone = getField("tone", keyTable1, valueTable1);
+		basicInfo.setting = getField("setting", keyTable1, valueTable1);
+		basicInfo.consent = getField("consent", keyTable1, valueTable1);
+		basicInfo.ds = getField("ds", keyTable1, valueTable1);
+		Element row = doc.select("dl[class*=row text-light]").first();
+		Elements keyTable2 = row.select("dt[class*=col-sm-3]");
+		Elements valueTable2 = doc.select("dd[class*=col-sm-9]");
+		basicInfo.orgasm = getField("orgasm", keyTable2, valueTable2);
+		basicInfo.instructions = getField("instructions", keyTable2, valueTable2);
+		basicInfo.intendedEffect = getField("intended effect", keyTable2, valueTable2);
 		return basicInfo;
+	}
+	
+	private static String getField(String key, Elements keyTable, Elements valueTable) {
+		int i;
+		for (i = 0; i < keyTable.size() &&
+				!keyTable.get(i).text().equalsIgnoreCase(key); i++);
+		if (i < valueTable.size() && !keyTable.isEmpty() && !valueTable.isEmpty()) //key and value exists
+			return valueTable.get(i).text();
+		return null;
 	}
 	
 	public String getAuthor() {

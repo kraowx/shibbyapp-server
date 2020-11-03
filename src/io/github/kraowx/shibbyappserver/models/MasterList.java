@@ -26,7 +26,7 @@ public class MasterList
 {
 //	public static final String MASTER_LIST_URL = "https://soundgasm.net/u/kinkyshibby";
 	public static final String MASTER_LIST_URL = "https://shibbydex.com/files";
-	public static final String LOCAL_LIST_PATH = "sdData.json";
+	public static final String LOCAL_LIST_PATH = "sd_data.json";
 	
 	private List<ShibbyFile> files;
 	private Document doc;
@@ -116,8 +116,10 @@ public class MasterList
 		{
 			ShibbyFile fileOld = this.files.get(i);
 			ShibbyFile fileNew = filesNew.get(i);
+			// Check if the files are not the same (on the surface)
 			if (!fileOld.getName().equals(fileNew.getName()) ||
 					!fileOld.getDescription().equals(fileNew.getDescription()) ||
+					!fileOld.getTier().equals(fileNew.getTier()) ||
 					fileOld.getDuration() != fileNew.getDuration())
 			{
 				return true;
@@ -141,6 +143,15 @@ public class MasterList
 //			String description = card.select("p[class*=card-text text-light]").text();
 //			String durationStr = card.select("dt[class*=text-center col-sm-3]").get(1).text();
 			Elements rowElms = card.select("dl[class*=row]").select("dt");
+			String tier = "free";
+			for (Element e : rowElms)
+			{
+				if (e.text().contains("Tier: "))
+				{
+					tier = e.text().substring(e.text().indexOf(":")+2).toLowerCase();
+					break;
+				}
+			}
 			String durationStr = "";
 			for (Element e : rowElms)
 			{
@@ -155,7 +166,7 @@ public class MasterList
 				durationStr = durationStr.substring(durationStr.indexOf(":")+2);
 			}
 			long duration = parseDuration(durationStr);
-			files.add(new ShibbyFile(name, id, "public", duration));
+			files.add(new ShibbyFile(name, id, tier, duration));
 		}
 		return files;
 	}
