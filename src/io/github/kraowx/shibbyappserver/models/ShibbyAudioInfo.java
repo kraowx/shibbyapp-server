@@ -2,6 +2,7 @@ package io.github.kraowx.shibbyappserver.models;
 
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class ShibbyAudioInfo {
@@ -12,14 +13,25 @@ public class ShibbyAudioInfo {
 	private String background;
 	
 	public static ShibbyAudioInfo fromHTML(Document doc) {
-		Elements tableInfo = doc.select("dd[class*=col-sm-3]");
+		Element row = doc.select("dl[class*=row row-cols-2 text-light]").get(1);
+		Elements keyTable = row.select("dt[class*=col-sm-3]");
+		Elements valueTable = row.select("dd[class*=col-sm-3]");
 		ShibbyAudioInfo audioInfo = new ShibbyAudioInfo();
-		audioInfo.fileType = tableInfo.get(8).text();
-		audioInfo.audioType = tableInfo.get(9).text();
+		audioInfo.fileType = getField("file type", keyTable, valueTable);
+		audioInfo.audioType = getField("audio type", keyTable, valueTable);
 		audioInfo.audioUrl = doc.select("source").attr("src");
-		audioInfo.effects = tableInfo.get(10).text();
-		audioInfo.background = tableInfo.get(11).text();
+		audioInfo.effects = getField("effects", keyTable, valueTable);
+		audioInfo.background = getField("background", keyTable, valueTable);
 		return audioInfo;
+	}
+	
+	private static String getField(String key, Elements keyTable, Elements valueTable) {
+		int i;
+		for (i = 0; i < keyTable.size() &&
+				!keyTable.get(i).text().equalsIgnoreCase(key); i++);
+		if (i < valueTable.size() && !keyTable.isEmpty() && !valueTable.isEmpty()) //key and value exists
+			return valueTable.get(i).text();
+		return null;
 	}
 	
 	public String getFileType() {

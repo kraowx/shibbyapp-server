@@ -22,15 +22,31 @@ public class ShibbyHypnosisInfo {
 			hypnosisInfo = new ShibbyHypnosisInfo();
 			hypnosisInfo.style = hypnosisInfoHeader.substring(hypnosisInfoHeader.indexOf(":")+2);
 			Element container = doc.select("dl[class*=row text-light]").get(1);
-			Elements tableInfo2 = container.select("dd[class*=col-sm-9]");
-			hypnosisInfo.level = tableInfo2.get(0).text();
-			hypnosisInfo.induction = tableInfo2.get(1).text();
-			hypnosisInfo.deepener = tableInfo2.get(2).text();
-			hypnosisInfo.body = tableInfo2.get(3).text();
-			hypnosisInfo.wakener = tableInfo2.get(4).text().equals("Yes") ? true : false;
-			hypnosisInfo.aftercare = tableInfo2.get(5).text().equals("Yes") ? true : false;
+			Elements keyTable = container.select("dt[class*=col-sm-3]");
+			Elements valueTable = container.select("dd[class*=col-sm-9]");
+//			hypnosisInfo.level = tableInfo2.get(0).text();
+//			hypnosisInfo.induction = tableInfo2.get(1).text();
+//			hypnosisInfo.deepener = tableInfo2.get(2).text();
+//			hypnosisInfo.body = tableInfo2.get(3).text();
+//			hypnosisInfo.wakener = tableInfo2.get(4).text().equals("Yes") ? true : false;
+//			hypnosisInfo.aftercare = tableInfo2.get(5).text().equals("Yes") ? true : false;
+			hypnosisInfo.level = getField("level", keyTable, valueTable);
+			hypnosisInfo.induction = getField("induction", keyTable, valueTable);
+			hypnosisInfo.deepener = getField("deepener", keyTable, valueTable);
+			hypnosisInfo.body = getField("body", keyTable, valueTable);
+			hypnosisInfo.wakener = getField("wakener", keyTable, valueTable).equals("Yes") ? true : false;
+			hypnosisInfo.aftercare = getField("aftercare", keyTable, valueTable).equals("Yes") ? true : false;
 		}
 		return hypnosisInfo;  // null if doesn't exist
+	}
+	
+	private static String getField(String key, Elements keyTable, Elements valueTable) {
+		int i;
+		for (i = 0; i < keyTable.size() &&
+				!keyTable.get(i).text().equalsIgnoreCase(key); i++);
+		if (i < valueTable.size() && !keyTable.isEmpty() && !valueTable.isEmpty()) //key and value exists
+			return valueTable.get(i).text();
+		return null;
 	}
 	
 	public String getStyle() {
