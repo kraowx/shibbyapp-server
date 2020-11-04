@@ -154,7 +154,7 @@ public class ShibbyFile
 //		this.id = getIdFromURL(fileUrl);
 		this.version = CURRENT_VERSION;
 		this.basicInfo = ShibbyBasicInfo.fromHTML(doc);
-		this.audioInfo = ShibbyAudioInfo.fromHTML(doc);
+		this.audioInfo = ShibbyAudioInfo.fromHTML(doc, id);
 		this.tags = getTagsFromHTML(doc);
 		this.hypnosisInfo = ShibbyHypnosisInfo.fromHTML(doc);
 		this.triggers = getTriggersFromHTML(doc);

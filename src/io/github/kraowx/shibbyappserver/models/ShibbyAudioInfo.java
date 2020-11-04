@@ -12,14 +12,15 @@ public class ShibbyAudioInfo {
 	private String effects;
 	private String background;
 	
-	public static ShibbyAudioInfo fromHTML(Document doc) {
+	public static ShibbyAudioInfo fromHTML(Document doc, String fileId) {
 		Element row = doc.select("dl[class*=row row-cols-2 text-light]").get(1);
 		Elements keyTable = row.select("dt[class*=col-sm-3]");
 		Elements valueTable = row.select("dd[class*=col-sm-3]");
 		ShibbyAudioInfo audioInfo = new ShibbyAudioInfo();
 		audioInfo.fileType = getField("file type", keyTable, valueTable);
 		audioInfo.audioType = getField("audio type", keyTable, valueTable);
-		audioInfo.audioUrl = doc.select("source").attr("src");
+//		audioInfo.audioUrl = doc.select("source").attr("src");
+		audioInfo.audioUrl = "https://shibbydex.com/audio/" + fileId;
 		audioInfo.effects = getField("effects", keyTable, valueTable);
 		audioInfo.background = getField("background", keyTable, valueTable);
 		return audioInfo;
