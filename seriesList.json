@@ -27,7 +27,7 @@
 				"audio_info": {
 					"file_type": "Series (My Good Boy) (1/4), Full",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/37617ee2-673c-46c8-9048-02b0ca830fe4.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/37617ee2-673c-46c8-9048-02b0ca830fe4.m4a",
 					"effects": "N/A",
 					"background": "Binaurals"
 				},
@@ -77,7 +77,7 @@
 				"audio_info": {
 					"file_type": "Series (My Good Boy) (2/4)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/d448baed-0991-4e25-ac5d-209771d20035.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/d448baed-0991-4e25-ac5d-209771d20035.m4a",
 					"effects": "N/A",
 					"background": "N/A"
 				},
@@ -128,9 +128,9 @@
 					"intended_effect": "N/A"
 				},
 				"audio_info": {
-					"file_type": "Series (My Good Boy) (4/4)",
+					"file_type": "Series (My Good Boy) (3/4)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/c829f54c-7abb-4765-976e-97334ecd275d.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/c829f54c-7abb-4765-976e-97334ecd275d.m4a",
 					"effects": "N/A",
 					"background": "Binaurals"
 				},
@@ -201,9 +201,9 @@
 					"intended_effect": "N/A"
 				},
 				"audio_info": {
-					"file_type": "Series (My Good Boy) (3/4), Variant (Binaurals, No Punishment)",
+					"file_type": "Series (My Good Boy) (4/4), Variant (Binaurals, No Punishment)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/4503129d-41b6-4bcf-8b2b-d51e90358c53.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/4503129d-41b6-4bcf-8b2b-d51e90358c53.m4a",
 					"effects": "Countdowns, Layers, Echoes, Impact Sounds",
 					"background": "Binaurals"
 				},
@@ -273,7 +273,7 @@
 				"audio_info": {
 					"file_type": "Loop, Variant (Binaurals)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/c21edebd-c272-4a7a-bb56-dc2cfd9bf131.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/c21edebd-c272-4a7a-bb56-dc2cfd9bf131.m4a",
 					"effects": "Layers",
 					"background": "Binaurals"
 				},
@@ -324,7 +324,7 @@
 				"audio_info": {
 					"file_type": "Full",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/c567b719-1d25-4d81-ad4a-bf7376818c1f.m4a",
+					"free_free_audio_url": "https://cdn.shibbydex.com/c567b719-1d25-4d81-ad4a-bf7376818c1f.m4a",
 					"effects": "Countdowns, Echoes",
 					"background": "Binaurals"
 				},
@@ -502,7 +502,7 @@
 				"audio_info": {
 					"file_type": "Series (2/4) (ASMR My Good Boy), Variant (Standard)",
 					"audio_type": "audio/x-m4a",
-					"audio_url": "https://cdn.shibbydex.com/28cb5c32-1b98-4008-8375-efc4ec52ec5c.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/28cb5c32-1b98-4008-8375-efc4ec52ec5c.m4a",
 					"effects": "Layers",
 					"background": "Binaurals"
 				},
@@ -567,7 +567,7 @@
 				"audio_info": {
 					"file_type": "Series (3/4) (ASMR My Good Boy), Variant (Standard)",
 					"audio_type": "audio/mpeg",
-					"audio_url": "https://cdn.shibbydex.com/82f4da9f-71a2-4032-aa25-eec2e7c0f92e.mp3",
+					"free_audio_url": "https://cdn.shibbydex.com/82f4da9f-71a2-4032-aa25-eec2e7c0f92e.mp3",
 					"effects": "Layers",
 					"background": "Binaurals"
 				},
@@ -639,7 +639,7 @@
 				"audio_info": {
 					"file_type": "Series (4/4) (ASMR My Good Boy), Variant (Standard)",
 					"audio_type": "audio/x-m4a",
-					"audio_url": "https://cdn.shibbydex.com/afe8d21d-8095-47c6-aed5-9c4cb61eb746.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/afe8d21d-8095-47c6-aed5-9c4cb61eb746.m4a",
 					"effects": "Countdowns, Layers, Echoes, Impact Sounds",
 					"background": "Binaurals"
 				},
@@ -736,7 +736,7 @@
 				"audio_info": {
 					"file_type": "Series (Indoctrination) (1/7)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/b4b44454-afe8-4813-9f39-95630cf63c4b.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/b4b44454-afe8-4813-9f39-95630cf63c4b.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -805,9 +805,9 @@
 					"intended_effect": "I am your Domina, you WILL obey me."
 				},
 				"audio_info": {
-					"file_type": "Series (Indoctrination) (1/7)",
+					"file_type": "Series (Indoctrination) (2/7)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/b4b44454-afe8-4813-9f39-95630cf63c4b.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/b4b44454-afe8-4813-9f39-95630cf63c4b.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -878,7 +878,7 @@
 				"audio_info": {
 					"file_type": "Loop",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/94917cae-5503-43d0-be13-25e036d955a6.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/94917cae-5503-43d0-be13-25e036d955a6.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Naked"
 				},
@@ -943,7 +943,7 @@
 				"audio_info": {
 					"file_type": "Series (Indoctrination) (4/7)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/eed96d6d-32f8-4acc-81a7-ae559f154efd.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/eed96d6d-32f8-4acc-81a7-ae559f154efd.m4a",
 					"effects": "Countdowns, Layers, Water Sounds",
 					"background": "Binaurals"
 				},
@@ -1023,7 +1023,7 @@
 				"audio_info": {
 					"file_type": "Series (Indoctrination) (5/7)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/0060e58a-4b0c-4a64-b142-00fbc8dcba9c.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/0060e58a-4b0c-4a64-b142-00fbc8dcba9c.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Music, Water Sounds"
 				},
@@ -1113,7 +1113,7 @@
 				"audio_info": {
 					"file_type": "Series (Indoctrination) (7/7), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/137d0744-b8af-4960-ac63-b834af68a6e7.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/137d0744-b8af-4960-ac63-b834af68a6e7.m4a",
 					"effects": "Countdowns, Layers, Rain Sounds, Fire Sounds",
 					"background": "Binaurals"
 				},
@@ -1208,7 +1208,7 @@
 				"audio_info": {
 					"file_type": "Series (Entranced Confessions), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/a218afa2-7bea-45c4-b81e-b00a033f6fc9.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/a218afa2-7bea-45c4-b81e-b00a033f6fc9.m4a",
 					"effects": "Countdowns, Layers, SFX",
 					"background": "Binaurals"
 				},
@@ -1300,7 +1300,7 @@
 				"audio_info": {
 					"file_type": "Series (Entranced Confessions)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/9f2c31f8-fd28-4b3c-b6b4-c6c8a05a8ed0.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/9f2c31f8-fd28-4b3c-b6b4-c6c8a05a8ed0.m4a",
 					"effects": "Layers, Countdowns, Door Sounds, Heels Sounds, Spanking Sounds",
 					"background": "N/A"
 				},
@@ -1367,7 +1367,7 @@
 				"audio_info": {
 					"file_type": "Series (Entranced Confessions)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/7b05ec76-8dac-4934-a00b-b5f71c5c984f.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/7b05ec76-8dac-4934-a00b-b5f71c5c984f.m4a",
 					"effects": "Countdown, Layers, Door Sounds, Heels Sounds",
 					"background": "N/A"
 				},
@@ -1438,7 +1438,7 @@
 				"audio_info": {
 					"file_type": "Series (Entranced Confessions)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/9c0416ce-b632-4033-9199-87a44685c11e.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/9c0416ce-b632-4033-9199-87a44685c11e.m4a",
 					"effects": "Layers, Echoes, Door Sounds, Heels Sounds",
 					"background": "N/A"
 				},
@@ -1511,7 +1511,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (1/10), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/e74d4ac4-4548-4577-88ea-46d6a5d77a8b.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/e74d4ac4-4548-4577-88ea-46d6a5d77a8b.m4a",
 					"effects": "Spin",
 					"background": "Binaurals"
 				},
@@ -1583,7 +1583,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (2/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/653791a8-d3a4-475c-a32b-4d0969b7af54.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/653791a8-d3a4-475c-a32b-4d0969b7af54.m4a",
 					"effects": "Countdowns, Layers, Water Sounds",
 					"background": "Binaurals, Music"
 				},
@@ -1658,7 +1658,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (3/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/e8052eb4-c10e-425a-9fc7-624fb1df3d51.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/e8052eb4-c10e-425a-9fc7-624fb1df3d51.m4a",
 					"effects": "Countdowns, Layers, Echoes",
 					"background": "Binaurals"
 				},
@@ -1736,7 +1736,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (4/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/574d4a01-6939-43cc-b8ee-bc193b2a5b4b.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/574d4a01-6939-43cc-b8ee-bc193b2a5b4b.m4a",
 					"effects": "Countdowns, Layers, Echoes",
 					"background": "Binaurals"
 				},
@@ -1805,7 +1805,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (5/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/1217424d-d74f-40ae-86ed-4ee887357852.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/1217424d-d74f-40ae-86ed-4ee887357852.m4a",
 					"effects": "Countdowns, Layers, Echoes",
 					"background": "Binaurals"
 				},
@@ -1882,7 +1882,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (6/10), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/ab7a915c-a852-416a-986a-1fcd621afcf1.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/ab7a915c-a852-416a-986a-1fcd621afcf1.m4a",
 					"effects": "Countdowns, Layers, Water Sounds, Nature Sounds, Pussy Sounds",
 					"background": "Binaurals, Music"
 				},
@@ -1974,7 +1974,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (7/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/63087b3b-ddd2-4dc0-9962-c7b46c466b0c.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/63087b3b-ddd2-4dc0-9962-c7b46c466b0c.m4a",
 					"effects": "Countdowns, Layers, Echoes",
 					"background": "Binaurals"
 				},
@@ -2048,7 +2048,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (8/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/a98a895b-15ea-43fc-8788-7c377fcb29a4.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/a98a895b-15ea-43fc-8788-7c377fcb29a4.m4a",
 					"effects": "Countdowns, Layers, Spin, Echoes",
 					"background": "Binaurals"
 				},
@@ -2127,7 +2127,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (9/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/4087a4dc-093a-4a15-a9d4-78f377af9712.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/4087a4dc-093a-4a15-a9d4-78f377af9712.m4a",
 					"effects": "None",
 					"background": "Naked"
 				},
@@ -2201,7 +2201,7 @@
 				"audio_info": {
 					"file_type": "Series (Orgasmic Training) (10/10)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/a638e47f-5c17-4ff6-adad-5b4ba13689f3.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/a638e47f-5c17-4ff6-adad-5b4ba13689f3.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Binaurals"
 				},
@@ -2283,7 +2283,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night One) (1/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/228bc0f6-3e40-4349-aa5f-c4680b9a0c63.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/228bc0f6-3e40-4349-aa5f-c4680b9a0c63.m4a",
 					"effects": "Countdowns, Layers, Chimes",
 					"background": "Binaurals"
 				},
@@ -2350,7 +2350,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Two) (2/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/b2d91374-b8b7-4489-9778-6a445f83b0a6.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/b2d91374-b8b7-4489-9778-6a445f83b0a6.m4a",
 					"effects": "Countdowns, Layers, Chimes",
 					"background": "Binaurals"
 				},
@@ -2418,7 +2418,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Three) (3/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/ec33cc1c-b2ac-4ede-896d-8aa28291c8ce.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/ec33cc1c-b2ac-4ede-896d-8aa28291c8ce.m4a",
 					"effects": "Countdowns, Layers, Chimes",
 					"background": "Binaurals"
 				},
@@ -2484,7 +2484,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Four) (4/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/8f9b1f3c-15d7-48f9-bcfe-decb2f8ff3ff.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/8f9b1f3c-15d7-48f9-bcfe-decb2f8ff3ff.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Binaurals"
 				},
@@ -2550,7 +2550,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Five) (5/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/b37bad6b-fcab-4f63-a9c0-7fc30f6807e6.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/b37bad6b-fcab-4f63-a9c0-7fc30f6807e6.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Binaurals"
 				},
@@ -2618,7 +2618,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Six) (6/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/f7201ed1-d800-4b72-81ac-fcfa323be331.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/f7201ed1-d800-4b72-81ac-fcfa323be331.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -2686,7 +2686,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Seven) (7/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/353d36ed-e4fe-4504-b83f-29d097ad7232.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/353d36ed-e4fe-4504-b83f-29d097ad7232.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -2752,7 +2752,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Eight) (8/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/1b50d4eb-4c41-47ed-8fdd-1fe24d3943f5.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/1b50d4eb-4c41-47ed-8fdd-1fe24d3943f5.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -2818,7 +2818,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Nine) (9/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/6031aa2d-7d47-4299-be12-6cc5e94208ea.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/6031aa2d-7d47-4299-be12-6cc5e94208ea.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -2884,7 +2884,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Ten) (10/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/892e0e88-7787-4504-b4a7-45aa999c84a1.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/892e0e88-7787-4504-b4a7-45aa999c84a1.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -2950,7 +2950,7 @@
 				"audio_info": {
 					"file_type": "Variant (Night Eleven) (11/11)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/fe711556-5d71-46e5-9301-6a812f7e7312.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/fe711556-5d71-46e5-9301-6a812f7e7312.m4a",
 					"effects": "Layers, Countdowns",
 					"background": "Binaurals"
 				},
@@ -3021,7 +3021,7 @@
 				"audio_info": {
 					"file_type": "Series (Part 1/3) (Sex with a 'Tist), Improv",
 					"audio_type": "N/A",
-					"audio_url": "https://cdn.shibbydex.com/5c046e53-e66c-4eb9-bb70-2386766c2bd1.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/5c046e53-e66c-4eb9-bb70-2386766c2bd1.m4a",
 					"effects": "Sheet Sounds",
 					"background": "N/A"
 				},
@@ -3082,7 +3082,7 @@
 				"audio_info": {
 					"file_type": "Series (Part 2/3) (Sex with a 'Tist), Improv",
 					"audio_type": "N/A",
-					"audio_url": "https://cdn.shibbydex.com/025a23a0-c97c-4255-a0c2-b2c2c4cb80c3.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/025a23a0-c97c-4255-a0c2-b2c2c4cb80c3.m4a",
 					"effects": "Sheet Sounds",
 					"background": "N/A"
 				},
@@ -3142,7 +3142,7 @@
 				"audio_info": {
 					"file_type": "Series (Part 3/3) (Sex with a 'Tist), Improv",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/0fa8f8c6-58f8-4e10-9e2c-9124bf7a7e59.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/0fa8f8c6-58f8-4e10-9e2c-9124bf7a7e59.m4a",
 					"effects": "N/A",
 					"background": "N/A"
 				},
@@ -3210,7 +3210,7 @@
 				"audio_info": {
 					"file_type": "Series (1/5) (Slut Inside), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/e6a7c16b-e23f-4d24-b288-e66db0ad3105.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/e6a7c16b-e23f-4d24-b288-e66db0ad3105.m4a",
 					"effects": "Countdowns, Echoes",
 					"background": "Binaurals"
 				},
@@ -3288,7 +3288,7 @@
 				"audio_info": {
 					"file_type": "Series (2/5) (Slut Inside), Variant (Standard)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/e5a9b6eb-2536-4e2e-915d-efede86eb2f0.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/e5a9b6eb-2536-4e2e-915d-efede86eb2f0.m4a",
 					"effects": "Countdowns",
 					"background": "Binaurals"
 				},
@@ -3378,7 +3378,7 @@
 				"audio_info": {
 					"file_type": "Series (3/5) (Slut Inside), Variant (Special Edit)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/16e85c0d-5324-4f25-9718-74b7f3506889.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/16e85c0d-5324-4f25-9718-74b7f3506889.m4a",
 					"effects": "Countdowns, Layers, Echoes, SFX",
 					"background": "Binaurals"
 				},
@@ -3458,7 +3458,7 @@
 				"audio_info": {
 					"file_type": "Series (4/5) (Slut Inside)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/31de630d-be81-4454-9aed-60271f0bcaf4.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/31de630d-be81-4454-9aed-60271f0bcaf4.m4a",
 					"effects": "Countdowns, Layers, Echoes, Birds Chirping, Rain Sounds, SFX",
 					"background": "Binaurals"
 				},
@@ -3546,7 +3546,7 @@
 				"audio_info": {
 					"file_type": "Series (5/5) (Slut Inside)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/4ff6635f-fe7e-4d42-af05-eff7e22d4924.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/4ff6635f-fe7e-4d42-af05-eff7e22d4924.m4a",
 					"effects": "Countdowns, Layers, Echoes, Spin, SFX",
 					"background": "Binaurals, Music"
 				},
@@ -3658,7 +3658,7 @@
 				"audio_info": {
 					"file_type": "Series (1/2) (States of Mind)",
 					"audio_type": "Stereo",
-					"audio_url": "https://cdn.shibbydex.com/ae5837e7-228f-41af-9ab5-aacd9bf6d43f.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/ae5837e7-228f-41af-9ab5-aacd9bf6d43f.m4a",
 					"effects": "Countdowns, Layers",
 					"background": "Music"
 				},
@@ -3730,7 +3730,7 @@
 				"audio_info": {
 					"file_type": "Countdowns, Layers, Echoes",
 					"audio_type": "Series (2/2) (States of Mind)",
-					"audio_url": "https://cdn.shibbydex.com/27e98137-2acf-47de-bed9-1c1d8d94f004.m4a",
+					"free_audio_url": "https://cdn.shibbydex.com/27e98137-2acf-47de-bed9-1c1d8d94f004.m4a",
 					"effects": "Countdowns, Layers, Echoes",
 					"background": "Music"
 				},
