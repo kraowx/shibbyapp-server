@@ -9,6 +9,7 @@ public class ShibbyAudioInfo {
 	private String fileType;
 	private String audioType;
 	private String audioUrl;
+	private String freeAudioUrl; // available if not logged in (null for patreon files)
 	private String effects;
 	private String background;
 	
@@ -19,7 +20,12 @@ public class ShibbyAudioInfo {
 		ShibbyAudioInfo audioInfo = new ShibbyAudioInfo();
 		audioInfo.fileType = getField("file type", keyTable, valueTable);
 		audioInfo.audioType = getField("audio type", keyTable, valueTable);
-//		audioInfo.audioUrl = doc.select("source").attr("src");
+		try {
+			audioInfo.freeAudioUrl = doc.select("source").attr("src");
+		}
+		catch (Exception e) {
+			audioInfo.freeAudioUrl = null; // always null for patreon files
+		}
 		audioInfo.audioUrl = "https://shibbydex.com/audio/" + fileId;
 		audioInfo.effects = getField("effects", keyTable, valueTable);
 		audioInfo.background = getField("background", keyTable, valueTable);
@@ -59,6 +65,14 @@ public class ShibbyAudioInfo {
 		this.audioUrl = audioUrl;
 	}
 	
+	public String getFreeAudioURL() {
+		return freeAudioUrl;
+	}
+	
+	public void setFreeAudioURL(String freeAudioUrl) {
+		this.freeAudioUrl = freeAudioUrl;
+	}
+	
 	public String getEffects() {
 		return effects;
 	}
@@ -80,6 +94,7 @@ public class ShibbyAudioInfo {
 		json.put("file_type", fileType);
 		json.put("audio_type", audioType);
 		json.put("audio_url", audioUrl);
+		json.put("free_audio_url", freeAudioUrl);
 		json.put("effects", effects);
 		json.put("background", background);
 		return json;
@@ -90,6 +105,7 @@ public class ShibbyAudioInfo {
 		audioInfo.fileType = json.has("file_type") ? json.getString("file_type") : null;
 		audioInfo.audioType = json.has("audio_type") ? json.getString("audio_type") : null;
 		audioInfo.audioUrl = json.has("audio_url") ? json.getString("audio_url") : null;
+		audioInfo.freeAudioUrl = json.has("free_audio_url") ? json.getString("free_audio_url") : null;
 		audioInfo.effects = json.has("effects") ? json.getString("effects") : null;
 		audioInfo.background = json.has("background") ? json.getString("background") : null;
 		return audioInfo;

@@ -408,6 +408,7 @@ public class DataUpdater
 						 */
 						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
 						newFile.applyHTML(doc);
+						System.out.println(newFile.getFreeAudioURL() + "   " + newFile.getName());
 //						if (includeFileDuration)
 //						{
 //							newFile.setDuration(getFileDuration(newFile));
