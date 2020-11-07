@@ -14,8 +14,8 @@ import io.github.kraowx.shibbyappserver.tools.Version;
 
 public class Server extends NanoHTTPD
 {
-	public static final Version VERSION = new Version("3.0.0");
-	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.9.0"), new Version("3.0.0")};  // v2.9.0 is a beta for debugging
+	public static final Version VERSION = new Version("3.0.1");
+	public static final Version[] SUPPORTED_VERSIONS = {new Version("3.0.0")};
 //	public static final Version[] SUPPORTED_VERSIONS = {new Version("2.0.0"),
 //			new Version("2.0.1"), new Version("2.0.2"), new Version("2.1.0"),
 //			new Version("2.1.1"), new Version("2.1.2"), new Version("2.1.3")};
