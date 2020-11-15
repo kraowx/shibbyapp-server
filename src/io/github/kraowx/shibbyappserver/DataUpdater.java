@@ -408,7 +408,6 @@ public class DataUpdater
 						 */
 						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
 						newFile.applyHTML(doc);
-						System.out.println(newFile.getFreeAudioURL() + "   " + newFile.getName());
 //						if (includeFileDuration)
 //						{
 //							newFile.setDuration(getFileDuration(newFile));
@@ -657,15 +656,15 @@ public class DataUpdater
 	private void updateTags()
 	{
 		tags.clear();
-		tagsWithPatreon.clear();
+//		tagsWithPatreon.clear();
 		updateListTags(files, tags);
-		if (patreonEnabled)
-		{
-			updateListTags(files, tagsWithPatreon);
-			updateListTags(parsePatreonFiles(patreonFiles), tagsWithPatreon);
-			filterTags(tagsWithPatreon);
-			Collections.sort(tagsWithPatreon, new SortByFileCount());
-		}
+//		if (patreonEnabled)
+//		{
+//			updateListTags(files, tagsWithPatreon);
+//			updateListTags(parsePatreonFiles(patreonFiles), tagsWithPatreon);
+//			filterTags(tagsWithPatreon);
+//			Collections.sort(tagsWithPatreon, new SortByFileCount());
+//		}
 		System.out.println(FormattedOutput.get("Filtering tags..."));
 		filterTags(tags);
 		System.out.println(FormattedOutput.get("Sorting tags..."));
