@@ -16,7 +16,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -384,15 +386,24 @@ public class DataUpdater
 				files = masterList.readLocalList();
 				filesTemp = (List<ShibbyFile>)((ArrayList<ShibbyFile>)files).clone();
 			}
-			int j = 0, filesAdded = 0;
+			
+			Map<String, Integer> fileIndex = new HashMap<String, Integer>();
+			for (int i = 0; i < files.size(); i++)
+			{
+				fileIndex.put(files.get(i).getId(), i);
+			}
+			
+//			int j = 0, filesAdded = 0;
 			for (int i = 0; i < newFiles.size(); i++)
 			{
-				ShibbyFile oldFile = null;
-				if (j < files.size())
-				{
-					oldFile = files.get(j);
-				}
 				ShibbyFile newFile = newFiles.get(i);
+				int idx = fileIndex.containsKey(newFile.getId()) ?
+						fileIndex.get(newFile.getId()) : -1;
+				ShibbyFile oldFile = idx != -1 ? files.get(idx) : null;
+//				if (j < files.size())
+//				{
+//					oldFile = files.get(j);
+//				}
 				if (oldFile == null || forceUpdate ||
 						!filesMostlyEqual(oldFile, newFile))
 				{
@@ -412,11 +423,13 @@ public class DataUpdater
 //						{
 //							newFile.setDuration(getFileDuration(newFile));
 //						}
-						if (oldFile != null && oldFile.getName().equals(newFile.getName()))
+						if (oldFile != null && oldFile.getId().equals(newFile.getId()))
 						{
 							// If a local file with the same name already exists,
 							// update the existing file with the contents of the new file
-							filesTemp.set(j + filesAdded, newFile);
+//							filesTemp.set(j + filesAdded, newFile);
+							filesTemp.remove(oldFile);
+							filesTemp.add(i, newFile);
 						}
 						else
 						{
@@ -436,7 +449,7 @@ public class DataUpdater
 				{
 					// Iterate through the local list separately
 					// from the updated list
-					j++;
+//					j++;
 				}
 			}
 			files = filesTemp;
@@ -858,7 +871,9 @@ public class DataUpdater
 	 */
 	private boolean filesMostlyEqual(ShibbyFile file1, ShibbyFile file2)
 	{
-		return file1.getName().equals(file2.getName());
+		return file1.getName().equals(file2.getName()) &&
+				file1.getTier().equals(file2.getTier())/* &&
+				file1.getDuration() == file2.getDuration()*/;
 	}
 	
 	/*
