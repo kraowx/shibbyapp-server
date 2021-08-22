@@ -422,7 +422,7 @@ public class DataUpdater
 						if (!newFile.applyHTML(doc)) {
 							offset++;
 							System.out.println(FormattedOutput.get("FAILED to update file " +
-									(i+1) + "/" + newFiles.size() + ". Skipping..."));
+									(i+1) + "/" + newFiles.size() + ". Skipping."));
 							continue;
 						}
 //						if (includeFileDuration)
