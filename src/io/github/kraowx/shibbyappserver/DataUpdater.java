@@ -375,6 +375,7 @@ public class DataUpdater
 				masterList.update(forceUpdate, remoteStorageEnabled,
 						remoteStorageUrl, remoteStorageKey, shibbydexClient))
 		{
+			int offset = 0;
 			List<ShibbyFile> newFiles = masterList.getFiles();
 			// A buffer is used so that the indices are not changed
 			// when the list is changed
@@ -418,7 +419,12 @@ public class DataUpdater
 						 * if an update is actually needed
 						 */
 						Document doc = shibbydexClient.getHTMLResource(newFile.getFileUrl());
-						newFile.applyHTML(doc);
+						if (!newFile.applyHTML(doc)) {
+							offset++;
+							System.out.println(FormattedOutput.get("FAILED to update file " +
+									(i+1) + "/" + newFiles.size() + ". Skipping..."));
+							continue;
+						}
 //						if (includeFileDuration)
 //						{
 //							newFile.setDuration(getFileDuration(newFile));
@@ -429,13 +435,13 @@ public class DataUpdater
 							// update the existing file with the contents of the new file
 //							filesTemp.set(j + filesAdded, newFile);
 							filesTemp.remove(oldFile);
-							filesTemp.add(i, newFile);
+							filesTemp.add(i-offset, newFile);
 						}
 						else
 						{
 							// If the file does not exist, add it at the
 							// current position in the list
-							filesTemp.add(i, newFile);
+							filesTemp.add(i-offset, newFile);
 						}
 					}
 					catch (IOException ioe)

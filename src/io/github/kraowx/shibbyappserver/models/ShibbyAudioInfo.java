@@ -14,7 +14,11 @@ public class ShibbyAudioInfo {
 	private String background;
 	
 	public static ShibbyAudioInfo fromHTML(Document doc, String fileId) {
-		Element row = doc.select("dl[class*=row row-cols-2 text-light]").get(1);
+		Elements rows = doc.select("dl[class*=row row-cols-2 text-light]");
+		if (rows.size() < 2) {
+			return null;
+		}
+		Element row = rows.get(1);
 		Elements keyTable = row.select("dt[class*=col-sm-3]");
 		Elements valueTable = row.select("dd[class*=col-sm-3]");
 		ShibbyAudioInfo audioInfo = new ShibbyAudioInfo();

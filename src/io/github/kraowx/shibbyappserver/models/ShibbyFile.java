@@ -67,8 +67,7 @@ public class ShibbyFile
 	private List<String> triggers;
 	private String description;
 	
-	public ShibbyFile(String name, String id,
-			String tier, long duration)
+	public ShibbyFile(String name, String id, String tier, long duration)
 	{
 		this.name = name;
 		this.id = id;
@@ -83,7 +82,6 @@ public class ShibbyFile
 		json.put("id", id);
 		json.put("version", version);
 		json.put("tier", tier);
-		json.put("duration", duration);
 		if (basicInfo != null) {
 			json.put("basic_info", basicInfo.toJSON());
 		}
@@ -124,7 +122,6 @@ public class ShibbyFile
         file.id = json.has("id") ? json.getString("id") : null;
         file.version = json.has("version") ? json.getInt("version") : 0;
         file.tier = json.has("tier") ? json.getString("tier") : DEFAULT_TIER;
-        file.duration = json.has("duration") ? json.getLong("duration") : 0;
         file.basicInfo = json.has("basic_info") ?
         		ShibbyBasicInfo.fromJSON(json.getJSONObject("basic_info")) :
         			new ShibbyBasicInfo();
@@ -148,17 +145,22 @@ public class ShibbyFile
         return file;
     }
 	
-	public void applyHTML(Document doc)
+	public boolean applyHTML(Document doc)
 	{
 		this.name = doc.select("h1[class*=display-4 text-center text-light shibbydex-font-accent]").text();
 //		this.id = getIdFromURL(fileUrl);
 		this.version = CURRENT_VERSION;
-		this.basicInfo = ShibbyBasicInfo.fromHTML(doc);
-		this.audioInfo = ShibbyAudioInfo.fromHTML(doc, id);
+		if ((this.basicInfo = ShibbyBasicInfo.fromHTML(doc)) == null) {
+			return false;
+		}
+		if ((this.audioInfo = ShibbyAudioInfo.fromHTML(doc, id)) == null) {
+			return false;
+		}
 		this.tags = getTagsFromHTML(doc);
 		this.hypnosisInfo = ShibbyHypnosisInfo.fromHTML(doc);
 		this.triggers = getTriggersFromHTML(doc);
 		this.description = doc.select("p[class*=lead text-light]").text();
+		return true;
 	}
 	
 	private List<String> getTagsFromHTML(Document doc)
